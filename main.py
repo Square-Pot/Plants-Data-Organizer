@@ -1,18 +1,12 @@
 from configparser import ConfigParser
-
-config = ConfigParser()
-config.read('settings.ini')
-
-
-print(config['MAIN']['input_folder'])
-print(config.sections())
-
+from app.Processor import Processor
 
 
 def main():
-    pass
-
-
+    config = ConfigParser()
+    config.read('settings.ini')
+    processor = Processor(config)
+    processor.exec()
 
 
 if __name__ == '__main__':
