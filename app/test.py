@@ -13,14 +13,17 @@ from utils import image_resize
 
 
 
-image = cv2.imread(r"/home/dntx/win/reps/DataMatrix-Sorter/app/IMG_20220330_0757191_50p.jpg")
+#image = cv2.imread(r"/home/dntx/win/reps/DataMatrix-Sorter/app/IMG_20220330_0757191_50p.jpg")
+#image = cv2.imread(r"/home/dntx/win/reps/DataMatrix-Sorter/app/l1.jpg")
+#image = cv2.imread(r"/home/dntx/win/reps/DataMatrix-Sorter/app/l2.jpg")
+image = cv2.imread(r"/home/dntx/win/reps/DataMatrix-Sorter/app/l3.jpg")
 
 image = image_resize(image, height=500)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 #blur = cv2.medianBlur(gray, 5)
 
 mean, std = cv2.meanStdDev(gray)
-x = 1.8
+x = 1.4
 tr_1 = mean - x*std
 tr_2 = mean + x*std
 
