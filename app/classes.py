@@ -113,9 +113,12 @@ class TargetImage:
         output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
 
         colors = [
-            (0, 0, 255),
-            (0, 255, 0),
-            (255, 0, 0),
+            (0, 0, 200),
+            (0, 200, 0),
+            (200, 0, 0),
+            (200, 200, 0),
+            (200, 0, 200),
+            (0, 200, 200),
         ]
         color_index = 0
 
@@ -148,12 +151,13 @@ class TargetImage:
                 scale_factor = output_image_width / dm_parent_img_width
 
                 # draw bounding boxex
+                padding = 5
                 cv2.rectangle(
                     output_image,
-                    (int(dmtx.bbox[0][0] * scale_factor), int(dmtx.bbox[0][1] * scale_factor)),
-                    (int(dmtx.bbox[0][2] * scale_factor), int(dmtx.bbox[0][3] * scale_factor) - 5), 
+                    (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
+                    (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
                     colors[color_index], 
-                    2
+                    3
                 )
 
                 color_index += 1
