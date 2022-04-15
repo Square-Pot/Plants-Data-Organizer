@@ -32,19 +32,17 @@ class Processor:
         dmd = DataMatrixDetector('model_final.pth')
         dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
 
-        image = cv2.imread("/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/l1.jpg")
+        image = cv2.imread("/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test.jpg")
         image = image_resize(image, height=500)
         dmd.detect(image)
-        dmd.visualize()
-        bboxes = dmd.get_bboxes()
-        for tens in bboxes:
-            y1 = int(tens[0][1])
-            y2 = int(tens[0][3])
-            x1 = int(tens[0][0])
-            x2 = int(tens[0][2])
-            cropped_image = image[y1:y2, x1:x2]
-            cv2.imshow('cropped', cropped_image)
-            cv2.waitKey()
+        data_matrices = dmd.get_result()
+        print(data_matrices)
+        if data_matrices:
+            for dm in data_matrices:
+                cv2.imshow('dm', dm.image)
+                cv2.waitKey()
+        #dmd.visualize()
+
 
 
     def __read_exifs(self):
