@@ -9,7 +9,7 @@ class DataMatrix:
     def __init__(self):
         self.image = None
         self.bbox = None     # preliminary bounding box (after Data Matrix area detection)
-        self.rect = None     # final rectangle (after successul Data Matrix decoding)
+        self.rect = None     # ??? final rectangle (after successul Data Matrix decoding)
         self.parent_image_shape = None
         self.decoded_successful: bool = None
         self.decoded_info: str = None
@@ -61,11 +61,11 @@ class TargetImage:
 
     def add_plant_name(self):
         # generate name or names
-        names = []
+        dmtxs = []
         if self.data_matrices:
             for dm in self.data_matrices:
                 if dm.decoded_successful:
-                    names.append(dm.fancy_name)
+                    dmtxs.append(dm)
         
         # font style
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -74,14 +74,14 @@ class TargetImage:
         thickness = 1
 
         # number of text lines
-        lines_num = len(names)
+        lines_num = len(dmtxs)
 
         # calculate text bounding box size
         line_h  = 0
         label_h = 0
         label_w = 0 
-        for line in names: 
-            label_size = cv2.getTextSize(line, font, font_scale, thickness)
+        for dmtx in dmtxs: 
+            label_size = cv2.getTextSize(dmtx.fancy_name, font, font_scale, thickness)
             label_h += label_size[0][1]
             if label_size[0][1] > line_h:
                 line_h = label_size[0][1]
@@ -94,14 +94,14 @@ class TargetImage:
         # calculate text origin
         output_image = image_resize(self.image, 600)
         h, w = output_image.shape[:2]
-        text_origin_x = 40
+        text_origin_x = 50
         text_origin_y = h - line_h * lines_num
 
         # calculate background origin and size 
         margin = 5
-        bgnd_x1 = text_origin_x - 20
+        bgnd_x1 = text_origin_x - 30
         bgnd_y1 = int(text_origin_y - line_h)
-        bgnd_x2 = int(label_w) + bgnd_x1 + 20 + margin
+        bgnd_x2 = int(label_w) + bgnd_x1 + 30 + margin
         bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
 
         # crop the background rect 
@@ -112,18 +112,52 @@ class TargetImage:
         # putting the image back to its position
         output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
 
+        colors = [
+            (0, 0, 255),
+            (0, 255, 0),
+            (255, 0, 0),
+        ]
+        color_index = 0
 
-        for name in names:
+        for dmtx in dmtxs:
 
             cv2.putText(
                 img=output_image, 
-                text=name, 
+                text=dmtx.fancy_name, 
                 org=(int(text_origin_x), int(text_origin_y)), 
                 fontFace=font, 
                 fontScale=font_scale, 
                 color=color,
                 thickness=thickness
             )
+
+            if len(dmtxs) > 1:
+                cv2.putText(
+                    img=output_image, 
+                    text='#', 
+                    org=(int(text_origin_x) - 20, int(text_origin_y)), 
+                    fontFace=cv2.FONT_HERSHEY_DUPLEX, 
+                    fontScale=font_scale, 
+                    color=colors[color_index],
+                    thickness=thickness
+                )
+
+                # calculate scale factor
+                dm_parent_img_width = dm.parent_image_shape[0]
+                output_image_width = output_image.shape[0]
+                scale_factor = output_image_width / dm_parent_img_width
+
+                # draw bounding boxex
+                cv2.rectangle(
+                    output_image,
+                    (int(dmtx.bbox[0][0] * scale_factor), int(dmtx.bbox[0][1] * scale_factor)),
+                    (int(dmtx.bbox[0][2] * scale_factor), int(dmtx.bbox[0][3] * scale_factor) - 5), 
+                    colors[color_index], 
+                    2
+                )
+
+                color_index += 1
+
             text_origin_y += line_h
         return output_image
 
