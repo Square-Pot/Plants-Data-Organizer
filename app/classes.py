@@ -2,6 +2,7 @@ import cv2
 
 from .utils import image_resize
 from .utils import decode_data_matrix
+from .utils import get_fancy_name
 
 class DataMatrix:
     def __init__(self):
@@ -12,6 +13,7 @@ class DataMatrix:
         self.decoded_successful: bool = None
         self.decoded_info: str = None
         self.db_data = None
+        self.fancy_name = None
 
     def decode(self,  db):
         self.db = db
@@ -21,14 +23,19 @@ class DataMatrix:
             self.decoded_info = info.decode("utf-8") 
             self.rect = rect
             self.__get_db_data()
+            self.__get_fansy_name()
         else:
             self.decoded_successful = False
 
     def __get_db_data(self):
         uid = self.decoded_info
-        print(type(uid))
         if self.db.key_exist(uid):
             self.db_data = self.db.get_item(uid)
+
+    def __get_fansy_name(self):
+        if self.decoded_successful:
+            self.fancy_name = get_fancy_name(self.db_data)
+
 
 
 class TargetImage:
@@ -50,6 +57,19 @@ class TargetImage:
         if self.data_matrices:
             for dm in self.data_matrices:
                 dm.decode(db)
+
+    def add_plant_name(self):
+        # generate name or names
+        names = []
+        if self.data_matrices:
+            for dm in self.data_matrices:
+                if dm.decoded_successful:
+                    names.append(dm.fancy_name)
+        return names
+
+        # create opacity box
+        # put text
+
                 
 
 

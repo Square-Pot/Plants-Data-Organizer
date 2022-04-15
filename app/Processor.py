@@ -43,14 +43,16 @@ class Processor:
         image = TargetImage(image_path)
         image.detect_dm(dmd)
         image.decode_dm(db)
+        n = image.add_plant_name()
 
-        print(image.data_matrices, '\n\n')
+        for i in n:
+            print(i)
 
-        for dm in image.data_matrices:
-            if dm.decoded_successful:
-                print(dm.db_data)
-            else:
-                print('Unsuccessful')       
+        # for dm in image.data_matrices:
+        #     if dm.decoded_successful:
+        #         print(dm.label_text)
+        #     else:
+        #         print('Unsuccessful')       
         
 
         #dmd.visualize()

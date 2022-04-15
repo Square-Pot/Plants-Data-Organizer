@@ -46,6 +46,47 @@ def decode_data_matrix(image) -> str:
     else:
         return None, None
 
+def __not_empty(data, field_name):
+    if field_name in data and        \
+            data[field_name] and     \
+            data[field_name] != 'None':
+        return True
+    else:
+        return False
+
+
+def get_fancy_name(data: dict) -> list:
+    
+    # name = []
+    # if __not_empty(data, 'number'):
+    #     name.append({
+    #         'content': data['number'] + ' ',
+    #         'style': 'regular'
+    #     })
+
+    name = ''
+
+    if __not_empty(data, 'number'):
+        name += data['number'] + ' '
+
+    if __not_empty(data, 'genus'):
+        name += data['genus'] + ' '
+
+    if __not_empty(data, 'species'):
+        name += data['species'] + ' '
+
+    if __not_empty(data, 'subspecies'):
+        name += 'subsp.' + data['subspecies'] + ' '
+
+    if __not_empty(data, 'variety'):
+        name += 'var.' + data['variety'] + ' '
+
+    if __not_empty(data, 'cultivar'):
+        name += 'cv' + data['cultivar'] + ' '
+
+    name += '[%s]' % data['UID']
+
+    return name
 
 
 if __name__ == '__main__':
