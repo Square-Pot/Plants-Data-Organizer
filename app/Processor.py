@@ -2,8 +2,9 @@ import cv2
 from configparser import ConfigParser
 
 from .classes import TargetImage
-from .dm_detector import DataMatrixDetector
-from .utils import image_resize
+from .dmtx_detector import DataMatrixDetector
+from .db import DB
+from .utils import image_resize 
 
 
 class Processor:
@@ -31,21 +32,23 @@ class Processor:
         #   move undetectable photos to unknown folder
 
         # Setting up data matrix detector
-        dmd = DataMatrixDetector('model_final.pth')
+        dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
         dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
 
-        # Image processing
+        # Setting up database
+        db = DB(self.config['DATABASE']['csv_file'])
 
+        # Image processing
         image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test.jpg'
         image = TargetImage(image_path)
         image.detect_dm(dmd)
-        image.decode_dm()
+        image.decode_dm(db)
 
         print(image.data_matrices, '\n\n')
 
         for dm in image.data_matrices:
             if dm.decoded_successful:
-                print(dm.decoded_info)
+                print(dm.db_data)
             else:
                 print('Unsuccessful')       
         

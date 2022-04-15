@@ -5,12 +5,30 @@ from .utils import decode_data_matrix
 
 class DataMatrix:
     def __init__(self):
-        image = None
-        bbox = None     # preliminary bounding box (after Data Matrix area detection)
-        rect = None     # final rectangle (after successul Data Matrix decoding)
-        parent_image_shape = None
-        decoded_successful: bool = None
-        decoded_info: str = None
+        self.image = None
+        self.bbox = None     # preliminary bounding box (after Data Matrix area detection)
+        self.rect = None     # final rectangle (after successul Data Matrix decoding)
+        self.parent_image_shape = None
+        self.decoded_successful: bool = None
+        self.decoded_info: str = None
+        self.db_data = None
+
+    def decode(self,  db):
+        self.db = db
+        info, rect = decode_data_matrix(self.image)
+        if info: 
+            self.decoded_successful = True
+            self.decoded_info = info.decode("utf-8") 
+            self.rect = rect
+            self.__get_db_data()
+        else:
+            self.decoded_successful = False
+
+    def __get_db_data(self):
+        uid = self.decoded_info
+        print(type(uid))
+        if self.db.key_exist(uid):
+            self.db_data = self.db.get_item(uid)
 
 
 class TargetImage:
@@ -28,18 +46,11 @@ class TargetImage:
         if data_matrices:
             self.data_matrices = data_matrices
 
-    def decode_dm(self):
+    def decode_dm(self, db):
         if self.data_matrices:
             for dm in self.data_matrices:
-                info, rect = decode_data_matrix(dm.image)
-                if info: 
-                    dm.decoded_successful = True
-                    dm.decoded_info = info
-                    dm.rect = rect
-                else:
-                    dm.decoded_successful = False
-        else:
-            print('Looks like there is no Data Matrix on image')
+                dm.decode(db)
+                
 
 
 
