@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 from .utils import image_resize
 from .utils import decode_data_matrix
@@ -93,8 +94,24 @@ class TargetImage:
         # calculate text origin
         output_image = image_resize(self.image, 600)
         h, w = output_image.shape[:2]
-        text_origin_x = 20
+        text_origin_x = 40
         text_origin_y = h - line_h * lines_num
+
+        # calculate background origin and size 
+        margin = 5
+        bgnd_x1 = text_origin_x - 20
+        bgnd_y1 = int(text_origin_y - line_h)
+        bgnd_x2 = int(label_w) + bgnd_x1 + 20 + margin
+        bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
+
+        # crop the background rect 
+        sub_img = output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
+        black_rect = np.ones(sub_img.shape, dtype=np.uint8) * 0
+        res = cv2.addWeighted(sub_img, 0.5, black_rect, 0.5, 1.0)
+
+        # putting the image back to its position
+        output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
+
 
         for name in names:
 
