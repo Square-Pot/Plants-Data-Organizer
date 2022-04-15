@@ -43,10 +43,11 @@ class Processor:
         image = TargetImage(image_path)
         image.detect_dm(dmd)
         image.decode_dm(db)
-        n = image.add_plant_name()
+        img_with_name = image.add_plant_name()
 
-        for i in n:
-            print(i)
+        cv2.imshow('with name', img_with_name)
+        cv2.waitKey()
+
 
         # for dm in image.data_matrices:
         #     if dm.decoded_successful:

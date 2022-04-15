@@ -65,10 +65,51 @@ class TargetImage:
             for dm in self.data_matrices:
                 if dm.decoded_successful:
                     names.append(dm.fancy_name)
-        return names
+        
+        # font style
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.5
+        color = (255, 255, 255)
+        thickness = 1
 
-        # create opacity box
-        # put text
+        # number of text lines
+        lines_num = len(names)
+
+        # calculate text bounding box size
+        line_h  = 0
+        label_h = 0
+        label_w = 0 
+        for line in names: 
+            label_size = cv2.getTextSize(line, font, font_scale, thickness)
+            label_h += label_size[0][1]
+            if label_size[0][1] > line_h:
+                line_h = label_size[0][1]
+            if label_size[0][0] > label_w:
+                label_w = label_size[0][0]
+
+        # interline factor
+        line_h = line_h * 1.6
+
+        # calculate text origin
+        output_image = image_resize(self.image, 600)
+        h, w = output_image.shape[:2]
+        text_origin_x = 20
+        text_origin_y = h - line_h * lines_num
+
+        for name in names:
+
+            cv2.putText(
+                img=output_image, 
+                text=name, 
+                org=(int(text_origin_x), int(text_origin_y)), 
+                fontFace=font, 
+                fontScale=font_scale, 
+                color=color,
+                thickness=thickness
+            )
+            text_origin_y += line_h
+        return output_image
+
 
                 
 
