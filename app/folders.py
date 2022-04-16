@@ -4,9 +4,12 @@ import re
 
 class FolderStructure:
 
-    def __init__(self, output_dir):
-        self.output_dir = output_dir
-        self.output_folder_is_exist = os.path.exists(output_dir)
+    def __init__(self, config):
+        self.config = config
+        self.output_dir = self.config['PATHS']['output_folder']
+        self.output_folder_is_exist = os.path.exists(self.output_dir)
+        self.manual_detected_folder = self.config['PATHS']['manual_detected_folder']
+        self.current_structure = {}
 
     def check(self, db_object):
         self.db = db_object
@@ -14,6 +17,10 @@ class FolderStructure:
             self.__update_structure()
         else:
             self.__create_structure()
+
+    def get_current_structure(self):
+        self.__get_current_structure()
+        return self.current_structure
     
     def __create_folder_item_name(self, item):
         name_list = []
@@ -33,7 +40,7 @@ class FolderStructure:
             item_folder_path = os.path.join(self.output_dir, folder_name)
             os.makedirs(item_folder_path)
             
-            manual_folder_path = os.path.join(item_folder_path, 'manual_detected')
+            manual_folder_path = os.path.join(item_folder_path, self.manual_detected_folder)
             os.makedirs(manual_folder_path)
 
     def __create_structure(self):
@@ -45,9 +52,8 @@ class FolderStructure:
         for uid in db_data: 
             self.__create_item_folder(db_data[uid])
 
-    def __update_structure(self):
+    def __get_current_structure(self):
         # get current folder structure
-        current_structure = {}  # uid:folder_name
         pattern = r"^(\d+)_.+$"
         output_dir_ls = os.listdir(self.output_dir)
         for folder in output_dir_ls:
@@ -56,17 +62,20 @@ class FolderStructure:
                 uid_search = re.search(pattern, folder)
                 if uid_search:
                     uid = uid_search.group(1)
-                    current_structure[uid] = folder
+                    self.current_structure[uid] = folder
                 else:
                     print('Foreign directory in output folder:', folder)
             else:
                 print('Foreign object in output folder:', folder)
 
+    def __update_structure(self):
+        self.__get_current_structure()
+
         # check each item from db: if it exist (by UID) and compare full folder names
         db_data = self.db.get_data()
         for uid in db_data:
-            if uid in current_structure:
-                folder_name_current = current_structure[uid]
+            if uid in self.current_structure:
+                folder_name_current = self.current_structure[uid]
                 folder_name_should_be = self.__create_folder_item_name(db_data[uid])
                 if  folder_name_current != folder_name_should_be:
                     os.rename(
