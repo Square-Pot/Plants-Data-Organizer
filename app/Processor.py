@@ -39,10 +39,11 @@ class Processor:
         db = DB(self.config['DATABASE']['csv_file'])
 
         # Image processing
-        image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test.jpg'
+        image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
         image = TargetImage(image_path)
         image.detect_dm(dmd)
         image.decode_dm(db)
+        image.extract_db_data()
         img_with_name = image.add_plant_name()
 
         cv2.imshow('with name', img_with_name)

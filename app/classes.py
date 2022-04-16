@@ -4,6 +4,8 @@ import numpy as np
 from .utils import image_resize
 from .utils import decode_data_matrix
 from .utils import get_fancy_name
+from .utils import get_seeding_date
+from .utils import get_shooting_date
 
 class DataMatrix:
     def __init__(self):
@@ -15,6 +17,8 @@ class DataMatrix:
         self.decoded_info: str = None
         self.db_data = None
         self.fancy_name = None
+        self.age_td = None
+        self.age_str = None
 
     def decode(self,  db):
         self.db = db
@@ -23,19 +27,42 @@ class DataMatrix:
             self.decoded_successful = True
             self.decoded_info = info.decode("utf-8") 
             self.rect = rect
-            self.__get_db_data()
-            self.__get_fansy_name()
         else:
             self.decoded_successful = False
+
+    def extract_db_data(self, shooting_date):
+        self.shooting_date = shooting_date
+        self.__get_db_data()
+        self.__get_fansy_name()
 
     def __get_db_data(self):
         uid = self.decoded_info
         if self.db.key_exist(uid):
             self.db_data = self.db.get_item(uid)
 
+    def __get_age(self):
+        seeding_date = get_seeding_date(self.db_data)
+        if seeding_date and self.shooting_date:
+            self.age_td = self.shooting_date - seeding_date
+            age_days = self.age_td.days
+            
+            years = age_days // 365
+            months = (age_days % 365) // 30
+            days = (age_days % 365) % 30
+
+            age_str = ''
+            if years:
+                age_str += '%sy ' % years
+            if months:
+                age_str += '%sm ' % months
+            if days:
+                age_str += '%sd ' % days
+
+            self.age_str = age_str
+
     def __get_fansy_name(self):
-        if self.decoded_successful:
-            self.fancy_name = get_fancy_name(self.db_data)
+        self.__get_age()
+        self.fancy_name = get_fancy_name(self.db_data, self.age_str)
 
 
 
@@ -44,6 +71,11 @@ class TargetImage:
         self.path_to_original = path_to_original
         self.image = cv2.imread(self.path_to_original)
         self.data_matrices = None
+        self.shooting_date = None
+        self.__get_shooting_date()
+
+    def __get_shooting_date(self):
+        self.shooting_date = get_shooting_date(self.path_to_original)
 
     def get_image_resized(self, height):
         return image_resize(self.image, height=height)
@@ -58,6 +90,13 @@ class TargetImage:
         if self.data_matrices:
             for dm in self.data_matrices:
                 dm.decode(db)
+
+    def extract_db_data(self):
+        if self.data_matrices:
+            for dm in self.data_matrices:
+                if dm.decoded_successful:
+                    dm.extract_db_data(self.shooting_date)
+
 
     def add_plant_name(self):
         # generate name or names

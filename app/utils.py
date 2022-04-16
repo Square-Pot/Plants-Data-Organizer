@@ -1,5 +1,9 @@
+import datetime
+import re
+import copy
 import cv2
 from pylibdmtx import pylibdmtx
+from PIL import Image
 
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -47,7 +51,8 @@ def decode_data_matrix(image) -> str:
         return None, None
 
 def __not_empty(data, field_name):
-    if field_name in data and        \
+    if data and \
+            field_name in data and        \
             data[field_name] and     \
             data[field_name] != 'None':
         return True
@@ -55,7 +60,7 @@ def __not_empty(data, field_name):
         return False
 
 
-def get_fancy_name(data: dict) -> list:
+def get_fancy_name(data: dict, age=None) -> list:
     
     # name = []
     # if __not_empty(data, 'number'):
@@ -82,11 +87,44 @@ def get_fancy_name(data: dict) -> list:
         name += 'var.' + data['variety'] + ' '
 
     if __not_empty(data, 'cultivar'):
-        name += 'cv' + data['cultivar'] + ' '
+        name += 'cv ' + data['cultivar'] + ' '
 
-    name += '[%s]' % data['UID']
+    if age:
+        name += '| Age: %s' % age
+
+    if __not_empty(data, 'UID'):
+        name += ' [%s]' % data['UID']
 
     return name
+
+def get_seeding_date(data: dict) -> datetime.datetime:
+    if __not_empty(data, 'seeding_date'):
+        date_string = data['seeding_date'].strip()
+        if re.match(r'\d{2}\.\d{2}\.\d{4}', date_string):
+            return datetime.datetime.strptime(date_string, '%d.%m.%Y')
+        elif re.match(r'\d{4}-\d{2}-\d{2}', date_string):
+            return datetime.datetime.strptime(date_string, '%Y-%m-%d')
+        else:
+            return None
+    else:
+        return None
+
+def get_shooting_date(image):
+    """Get date when a photo was taken from EXIF"""
+    i = Image.open(image)
+    exif = i._getexif()
+    if exif and 36867 in exif:
+        dt_str = exif[36867]
+        try:
+            dt = datetime.datetime.strptime(dt_str, '%Y:%m:%d %H:%M:%S')
+            #print('EXIF shooting date:', dt)
+            return dt
+        except Exception as e:
+            print('Parcing EXIF shooting date unsuccessful:', dt_str, e)
+            return None
+    else:
+        print('No shooting date in EXIF')
+        return None
 
 
 if __name__ == '__main__':
