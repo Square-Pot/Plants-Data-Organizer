@@ -1,9 +1,10 @@
 import cv2
 from configparser import ConfigParser
 
+from .db import DB
+from .folders import FolderStructure
 from .classes import TargetImage
 from .dmtx_detector import DataMatrixDetector
-from .db import DB
 from .utils import image_resize 
 
 
@@ -31,34 +32,32 @@ class Processor:
         #   remove from input
         #   move undetectable photos to unknown folder
 
-        # Setting up data matrix detector
-        dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
-        dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
-
         # Setting up database
         db = DB(self.config['DATABASE']['csv_file'])
 
-        # Image processing
-        image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
-        image = TargetImage(image_path)
-        image.detect_dm(dmd)
-        image.decode_dm(db)
-        image.extract_db_data()
-        img_with_name = image.add_plant_name()
-
-        cv2.imshow('with name', img_with_name)
-        cv2.waitKey()
+        # Create/update output folder structure
+        folder_structure = FolderStructure(self.config['PATHS']['output_folder'])
+        folder_structure.check(db)
 
 
-        # for dm in image.data_matrices:
-        #     if dm.decoded_successful:
-        #         print(dm.label_text)
-        #     else:
-        #         print('Unsuccessful')       
-        
 
-        #dmd.visualize()
 
+
+        # # Setting up data matrix detector
+        # dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
+        # dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
+      
+
+        # # Image processing
+        # image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
+        # image = TargetImage(image_path)
+        # image.detect_dm(dmd)
+        # image.decode_dm(db)
+        # image.extract_db_data()
+        # img_with_name = image.add_plant_name()
+
+        # cv2.imshow('with name', img_with_name)
+        # cv2.waitKey()
 
 
     def __read_exifs(self):
