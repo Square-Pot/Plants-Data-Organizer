@@ -1,5 +1,6 @@
 import os
 import re
+import cv2
 
 
 class FolderStructure:
@@ -9,7 +10,9 @@ class FolderStructure:
         self.output_dir = self.config['PATHS']['output_folder']
         self.output_folder_is_exist = os.path.exists(self.output_dir)
         self.manual_detected_folder = self.config['PATHS']['manual_detected_folder']
+        self.input_folder = self.config['PATHS']['input_folder']
         self.current_structure = {}
+        self.unsuccessful_folder = None
 
     def check(self, db_object):
         self.db = db_object
@@ -21,7 +24,56 @@ class FolderStructure:
     def get_current_structure(self):
         self.__get_current_structure()
         return self.current_structure
+
+    def move_to_unsuccessful(self, file_path):
+        if not self.unsuccessful_folder:
+            self.__create_unsuccessful_dir()
+        os.replace(
+            file_path, 
+            # could not working on windows:
+            os.path.join(self.unsuccessful_folder, os.path.basename(file_path))
+        )
+
+    @staticmethod
+    def __create_photo_filename(uid: str, dt, extension):
+        filename_list = [
+            uid,
+            dt.strftime('%Y-%m-%d')
+        ]
+        filename_str = '_'.join(filename_list)
+        filename_str += extension
+
+        return filename_str
+
+    def __get_output_path_by_uid(self, uid):
+        self.__update_structure()
+        path = os.path.join(
+            self.output_dir,
+            self.current_structure[uid],
+        )
+        return path
+
+    def save_image_to_output(self, image):
+        for dm in image.data_matrices:
+            if dm.decoded_successful:
+                filename, file_extension = os.path.splitext(image.path_to_original)
+                file_name = self.__create_photo_filename(
+                    dm.decoded_info,
+                    image.shooting_date,
+                    file_extension
+                )
+                file_path = os.path.join(
+                    self.__get_output_path_by_uid(dm.decoded_info),
+                    file_name
+                )
+                cv2.imwrite(file_path, image.output_image)
+                print('Saved image:', file_path)
     
+    def __create_unsuccessful_dir(self):
+        self.unsuccessful_folder = os.path.join(self.input_folder, 'unsuccessful')
+        if not os.path.exists(self.unsuccessful_folder):
+            os.mkdir(self.unsuccessful_folder)
+
     def __create_folder_item_name(self, item):
         name_list = []
         # UID|number|genus|species|subspecies|variety|cultivar|synonym|form|affinity|ex|information|source|seeding_date|purchase_date|pot_width|pot_height|soil|description

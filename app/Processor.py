@@ -1,3 +1,4 @@
+import os
 import cv2
 from configparser import ConfigParser
 
@@ -7,7 +8,6 @@ from .source import Source
 from .classes import TargetImage
 from .dmtx_detector import DataMatrixDetector
 from .utils import image_resize 
-
 
 
 class Processor:
@@ -41,26 +41,43 @@ class Processor:
 
         # Read input forlder
         photo_source = Source(self.config)
+
+        # Proceed soure photos with auto detection
         source_photos_auto = photo_source.read_auto()
-        source_photos_manual = photo_source.read_manual(folder_structure)
+        print(len(source_photos_auto), 'photos found in INPUT')
 
-
-
-        # # Setting up data matrix detector
-        # dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
-        # dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
+        # Setting up data matrix detector
+        dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
+        dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
       
-        # # Image processing
-        # image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
-        # image = TargetImage(image_path)
-        # image.detect_dm(dmd)
-        # image.decode_dm(self.db)
-        # image.extract_db_data()
-        # img_with_name = image.add_plant_name()
+        # Image processing
+        for image_path in source_photos_auto:
+            #image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
+            resize_width = int(self.config['MAIN']['output_width'])
+            image = TargetImage(image_path, resize = resize_width)
+            dm_is_detected = image.detect_dm(dmd)
+            if dm_is_detected:
+                image.decode_dm(self.db)
+                for dm in image.data_matrices:
+                    print(dm.decoded_successful)
+                image.extract_db_data()
+                image.add_plant_labels()
+                if image.output_image is not None:
+                    folder_structure.save_image_to_output(image)
+                else:
+                    print('Data Matrix was not decoded', image_path)
+                    folder_structure.move_to_unsuccessful(image_path)
+            else:
+                print('Data Matrix not found:', image_path)
+                folder_structure.move_to_unsuccessful(image_path)
+                
 
         # cv2.imshow('with name', img_with_name)
         # cv2.waitKey()
 
+
+
+        # Proceed photos manyally detected
 
     def __read_exifs(self):
         pass

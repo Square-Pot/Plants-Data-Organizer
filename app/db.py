@@ -1,3 +1,4 @@
+import re
 
 
 class DB:
@@ -25,12 +26,13 @@ class DB:
             fields = line.split(DB.SEPARATOR)
             if len(fields) > 1:
                 uid = fields[0]
-                data = {}
-                for i, field in enumerate(fields):
-                    if field: 
-                        key = self.keys[i]
-                        data[key] = field
-                self.data[uid] = data
+                if re.match(r'^\d+$', uid):
+                    data = {}
+                    for i, field in enumerate(fields):
+                        if field: 
+                            key = self.keys[i]
+                            data[key] = field
+                    self.data[uid] = data
 
     def get_data(self):
         return self.data

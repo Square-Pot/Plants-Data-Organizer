@@ -67,24 +67,30 @@ class DataMatrix:
 
 
 class TargetImage:
-    def __init__(self, path_to_original: str):
+    def __init__(self, path_to_original: str, resize: int = None):
         self.path_to_original = path_to_original
         self.image = cv2.imread(self.path_to_original)
+        if resize:
+            self.image = self.get_image_resized(resize)
         self.data_matrices = None
         self.shooting_date = None
         self.__get_shooting_date()
+        self.output_image = None
 
     def __get_shooting_date(self):
         self.shooting_date = get_shooting_date(self.path_to_original)
 
-    def get_image_resized(self, height):
-        return image_resize(self.image, height=height)
+    def get_image_resized(self, width):
+        return image_resize(self.image, width=width)
 
     def detect_dm(self, data_matrix_detector):
-        data_matrix_detector.detect(self.get_image_resized(500)) # TODO: size of detecting image
+        data_matrix_detector.detect(self.image)
         data_matrices = data_matrix_detector.get_result()
         if data_matrices:
             self.data_matrices = data_matrices
+            return True
+        else:
+            return False
 
     def decode_dm(self, db):
         if self.data_matrices:
@@ -98,111 +104,113 @@ class TargetImage:
                     dm.extract_db_data(self.shooting_date)
 
 
-    def add_plant_name(self):
+    def add_plant_labels(self):
         # generate name or names
         dmtxs = []
         if self.data_matrices:
             for dm in self.data_matrices:
                 if dm.decoded_successful:
                     dmtxs.append(dm)
+
+        if dmtxs:
         
-        # font style
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.5
-        color = (255, 255, 255)
-        thickness = 1
+            # font style
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1
+            color = (255, 255, 255)
+            thickness = 1
 
-        # number of text lines
-        lines_num = len(dmtxs)
+            # number of text lines
+            lines_num = len(dmtxs)
 
-        # calculate text bounding box size
-        line_h  = 0
-        label_h = 0
-        label_w = 0 
-        for dmtx in dmtxs: 
-            label_size = cv2.getTextSize(dmtx.fancy_name, font, font_scale, thickness)
-            label_h += label_size[0][1]
-            if label_size[0][1] > line_h:
-                line_h = label_size[0][1]
-            if label_size[0][0] > label_w:
-                label_w = label_size[0][0]
+            # calculate text bounding box size
+            line_h  = 0
+            label_h = 0
+            label_w = 0 
+            for dmtx in dmtxs: 
+                label_size = cv2.getTextSize(dmtx.fancy_name, font, font_scale, thickness)
+                label_h += label_size[0][1]
+                if label_size[0][1] > line_h:
+                    line_h = label_size[0][1]
+                if label_size[0][0] > label_w:
+                    label_w = label_size[0][0]
 
-        # interline factor
-        line_h = line_h * 1.6
+            # interline factor
+            line_h = line_h * 1.6
 
-        # calculate text origin
-        output_image = image_resize(self.image, 600)
-        h, w = output_image.shape[:2]
-        text_origin_x = 50
-        text_origin_y = h - line_h * lines_num
+            # calculate text origin
+            output_image = self.image.copy()
+            h, w = output_image.shape[:2]
+            text_origin_x = 50
+            text_origin_y = h - line_h * lines_num
 
-        # calculate background origin and size 
-        margin = 5
-        bgnd_x1 = text_origin_x - 30
-        bgnd_y1 = int(text_origin_y - line_h)
-        bgnd_x2 = int(label_w) + bgnd_x1 + 30 + margin
-        bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
+            # calculate background origin and size 
+            margin = 5
+            bgnd_x1 = text_origin_x - 30
+            bgnd_y1 = int(text_origin_y - line_h)
+            bgnd_x2 = int(label_w) + bgnd_x1 + 30 + margin
+            bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
 
-        # crop the background rect 
-        sub_img = output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
-        black_rect = np.ones(sub_img.shape, dtype=np.uint8) * 0
-        res = cv2.addWeighted(sub_img, 0.5, black_rect, 0.5, 1.0)
+            # crop the background rect 
+            sub_img = output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
+            black_rect = np.ones(sub_img.shape, dtype=np.uint8) * 0
+            res = cv2.addWeighted(sub_img, 0.5, black_rect, 0.5, 1.0)
 
-        # putting the image back to its position
-        output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
+            # putting the image back to its position
+            output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
 
-        colors = [
-            (0, 0, 200),
-            (0, 200, 0),
-            (200, 0, 0),
-            (200, 200, 0),
-            (200, 0, 200),
-            (0, 200, 200),
-        ]
-        color_index = 0
+            colors = [
+                (0, 0, 200),
+                (0, 200, 0),
+                (200, 0, 0),
+                (200, 200, 0),
+                (200, 0, 200),
+                (0, 200, 200),
+            ]
+            color_index = 0
 
-        for dmtx in dmtxs:
+            for dmtx in dmtxs:
 
-            cv2.putText(
-                img=output_image, 
-                text=dmtx.fancy_name, 
-                org=(int(text_origin_x), int(text_origin_y)), 
-                fontFace=font, 
-                fontScale=font_scale, 
-                color=color,
-                thickness=thickness
-            )
-
-            if len(dmtxs) > 1:
                 cv2.putText(
                     img=output_image, 
-                    text='#', 
-                    org=(int(text_origin_x) - 20, int(text_origin_y)), 
-                    fontFace=cv2.FONT_HERSHEY_DUPLEX, 
+                    text=dmtx.fancy_name, 
+                    org=(int(text_origin_x), int(text_origin_y)), 
+                    fontFace=font, 
                     fontScale=font_scale, 
-                    color=colors[color_index],
+                    color=color,
                     thickness=thickness
                 )
 
-                # calculate scale factor
-                dm_parent_img_width = dm.parent_image_shape[0]
-                output_image_width = output_image.shape[0]
-                scale_factor = output_image_width / dm_parent_img_width
+                if len(dmtxs) > 1:
+                    cv2.putText(
+                        img=output_image, 
+                        text='#', 
+                        org=(int(text_origin_x) - 20, int(text_origin_y)), 
+                        fontFace=cv2.FONT_HERSHEY_DUPLEX, 
+                        fontScale=font_scale, 
+                        color=colors[color_index],
+                        thickness=thickness
+                    )
 
-                # draw bounding boxex
-                padding = 5
-                cv2.rectangle(
-                    output_image,
-                    (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
-                    (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
-                    colors[color_index], 
-                    3
-                )
+                    # calculate scale factor
+                    dm_parent_img_width = dm.parent_image_shape[0]
+                    output_image_width = output_image.shape[0]
+                    scale_factor = output_image_width / dm_parent_img_width
 
-                color_index += 1
+                    # draw bounding boxex
+                    padding = 5
+                    cv2.rectangle(
+                        output_image,
+                        (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
+                        (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
+                        colors[color_index], 
+                        5
+                    )
 
-            text_origin_y += line_h
-        return output_image
+                    color_index += 1
+
+                text_origin_y += line_h
+            self.output_image = output_image
 
 
                 
