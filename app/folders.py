@@ -1,4 +1,5 @@
 import os
+import re
 
 
 class FolderStructure:
@@ -6,7 +7,6 @@ class FolderStructure:
     def __init__(self, output_dir):
         self.output_dir = output_dir
         self.output_folder_is_exist = os.path.exists(output_dir)
-
 
     def check(self, db_object):
         self.db = db_object
@@ -26,7 +26,6 @@ class FolderStructure:
         name_str = '_'.join(name_list)
         return name_str
 
-
     def __create_item_folder(self, item):
         if item and 'UID' in item: 
             folder_name = self.__create_folder_item_name(item)
@@ -37,7 +36,6 @@ class FolderStructure:
             manual_folder_path = os.path.join(item_folder_path, 'manual_detected')
             os.makedirs(manual_folder_path)
 
-
     def __create_structure(self):
         # create main output folder
         os.makedirs(self.output_dir)
@@ -47,12 +45,43 @@ class FolderStructure:
         for uid in db_data: 
             self.__create_item_folder(db_data[uid])
 
+    def __update_structure(self):
+        # get current folder structure
+        current_structure = {}  # uid:folder_name
+        pattern = r"^(\d+)_.+$"
+        output_dir_ls = os.listdir(self.output_dir)
+        for folder in output_dir_ls:
+            folder_path = os.path.join(self.output_dir, folder)
+            if os.path.exists(folder_path):
+                uid_search = re.search(pattern, folder)
+                if uid_search:
+                    uid = uid_search.group(1)
+                    current_structure[uid] = folder
+                else:
+                    print('Foreign directory in output folder:', folder)
+            else:
+                print('Foreign object in output folder:', folder)
 
+        # check each item from db: if it exist (by UID) and compare full folder names
+        db_data = self.db.get_data()
+        for uid in db_data:
+            if uid in current_structure:
+                folder_name_current = current_structure[uid]
+                folder_name_should_be = self.__create_folder_item_name(db_data[uid])
+                if  folder_name_current != folder_name_should_be:
+                    os.rename(
+                        os.path.join(self.output_dir, folder_name_current),
+                        os.path.join(self.output_dir, folder_name_should_be)
+                    )
+                    print(uid, 'Name of folder was changed')
+            else:
+                if re.match(r'\d+', uid):
+                    self.__create_item_folder(db_data[uid])
+                    print(uid, 'Folder for UID was not found. Now created')
 
 
 def main():
     fs = FolderStructure('../OUTPUT')
-    
 
 
 if __name__ == '__main__':
