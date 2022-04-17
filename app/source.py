@@ -54,12 +54,13 @@ class Source:
                     )
         return input_photos
 
-
-
-    @staticmethod
-    def __is_photo(filename):
+    def __is_photo(self, filename):
         if re.match(r'^.+\.(?:jpg|png)$', filename):
             return True
         else:
-            print('Looks like non image file is in input folder:', filename)
+            # check if it folder
+            input_folder = self.config['PATHS']['input_folder']
+            file_path = os.path.join(input_folder, filename)
+            if not os.path.isdir(file_path):
+                print('Looks like non image file is in input folder:', filename)
             return False

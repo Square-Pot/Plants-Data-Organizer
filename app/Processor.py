@@ -59,7 +59,10 @@ class Processor:
             if dm_is_detected:
                 image.decode_dm(self.db)
                 for dm in image.data_matrices:
-                    print(dm.decoded_successful)
+                    if dm.decoded_successful:
+                        print('Decoded:', dm.decoded_info)
+                    else:
+                        print('Decoded: unsuccessful')
                 image.extract_db_data()
                 image.add_plant_labels()
                 if image.output_image is not None:
