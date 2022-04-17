@@ -54,7 +54,7 @@ class Processor:
         for image_path in source_photos_auto:
             #image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
             resize_width = int(self.config['MAIN']['output_width'])
-            image = TargetImage(image_path, resize = resize_width)
+            image = TargetImage(image_path, self.config)
             dm_is_detected = image.detect_dm(dmd)
             if dm_is_detected:
                 image.decode_dm(self.db)

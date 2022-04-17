@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import random
 
 from .utils import image_resize
 from .utils import decode_data_matrix
@@ -67,11 +68,14 @@ class DataMatrix:
 
 
 class TargetImage:
-    def __init__(self, path_to_original: str, resize: int = None):
+    def __init__(self, path_to_original: str, config):
         self.path_to_original = path_to_original
         self.image = cv2.imread(self.path_to_original)
+        self.config = config
+        resize = int(config['MAIN']['resize_output'])
         if resize:
-            self.image = self.get_image_resized(resize)
+            size = int(config['MAIN']['output_width'])
+            self.image = self.get_image_resized(size)
         self.data_matrices = None
         self.shooting_date = None
         self.__get_shooting_date()
@@ -116,9 +120,9 @@ class TargetImage:
         
             # font style
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 1
-            color = (255, 255, 255)
-            thickness = 1
+            font_scale = int(self.config['LABELS']['font_scale'])
+            color = tuple(int(i) for i in self.config['LABELS']['font_color'].split(','))
+            thickness = int(self.config['LABELS']['font_thickness'])
 
             # number of text lines
             lines_num = len(dmtxs)
@@ -141,14 +145,19 @@ class TargetImage:
             # calculate text origin
             output_image = self.image.copy()
             h, w = output_image.shape[:2]
-            text_origin_x = 50
+            text_origin_x = 100
             text_origin_y = h - line_h * lines_num
+
+            # adjust font scale if label is not fit in image
+            if label_w > w:
+                font_scale = label_w/w
+
 
             # calculate background origin and size 
             margin = 5
-            bgnd_x1 = text_origin_x - 30
+            bgnd_x1 = text_origin_x - 60
             bgnd_y1 = int(text_origin_y - line_h)
-            bgnd_x2 = int(label_w) + bgnd_x1 + 30 + margin
+            bgnd_x2 = int(label_w) + bgnd_x1 + 60 + margin
             bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
 
             # crop the background rect 
@@ -167,10 +176,11 @@ class TargetImage:
                 (200, 0, 200),
                 (0, 200, 200),
             ]
-            color_index = 0
+
+            color_indexes = list(range(len(colors)))
 
             for dmtx in dmtxs:
-
+                # put text name
                 cv2.putText(
                     img=output_image, 
                     text=dmtx.fancy_name, 
@@ -180,34 +190,38 @@ class TargetImage:
                     color=color,
                     thickness=thickness
                 )
+                
+                # get marker color
+                if not color_indexes:
+                    color_indexes = list(range(len(colors)))
+                color_index = random.choice(color_indexes)
+                color_indexes.remove(color_index)
 
-                if len(dmtxs) > 1:
-                    cv2.putText(
-                        img=output_image, 
-                        text='#', 
-                        org=(int(text_origin_x) - 20, int(text_origin_y)), 
-                        fontFace=cv2.FONT_HERSHEY_DUPLEX, 
-                        fontScale=font_scale, 
-                        color=colors[color_index],
-                        thickness=thickness
-                    )
+                # put marker
+                cv2.putText(
+                    img=output_image, 
+                    text='#', 
+                    org=(int(text_origin_x) - 40, int(text_origin_y)), 
+                    fontFace=cv2.FONT_HERSHEY_DUPLEX, 
+                    fontScale=font_scale, 
+                    color=colors[color_index],
+                    thickness=thickness
+                )
 
-                    # calculate scale factor
-                    dm_parent_img_width = dm.parent_image_shape[0]
-                    output_image_width = output_image.shape[0]
-                    scale_factor = output_image_width / dm_parent_img_width
+                # calculate scale factor
+                dm_parent_img_width = dm.parent_image_shape[0]
+                output_image_width = output_image.shape[0]
+                scale_factor = output_image_width / dm_parent_img_width
 
-                    # draw bounding boxex
-                    padding = 5
-                    cv2.rectangle(
-                        output_image,
-                        (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
-                        (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
-                        colors[color_index], 
-                        5
-                    )
-
-                    color_index += 1
+                # draw bounding boxex
+                padding = 5
+                cv2.rectangle(
+                    output_image,
+                    (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
+                    (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
+                    colors[color_index], 
+                    5
+                )
 
                 text_origin_y += line_h
             self.output_image = output_image
