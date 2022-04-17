@@ -81,10 +81,10 @@ def get_fancy_name(data: dict, age=None) -> list:
         name += data['species'] + ' '
 
     if __not_empty(data, 'subspecies'):
-        name += 'subsp.' + data['subspecies'] + ' '
+        name += 'ssp. ' + data['subspecies'] + ' '
 
     if __not_empty(data, 'variety'):
-        name += 'var.' + data['variety'] + ' '
+        name += 'var. ' + data['variety'] + ' '
 
     if __not_empty(data, 'cultivar'):
         name += 'cv ' + data['cultivar'] + ' '

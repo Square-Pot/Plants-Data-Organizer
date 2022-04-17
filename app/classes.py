@@ -150,7 +150,8 @@ class TargetImage:
 
             # adjust font scale if label is not fit in image
             if label_w > w:
-                font_scale = label_w/w
+                font_scale = w/label_w
+
 
 
             # calculate background origin and size 
