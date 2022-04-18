@@ -50,10 +50,9 @@ class Processor:
         dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
         dmd.set_score_threshold(self.config['DETECTION']['score_threshold'])
       
-        # Image processing
+        # Images processing: decoding and labeling 
         for image_path in source_photos_auto:
             #image_path = '/home/demetrius/Projects/DataMatrix-Sorter/photo_examples/test_exif2.jpg'
-            resize_width = int(self.config['MAIN']['output_width'])
             image = TargetImage(image_path, self.config)
             dm_is_detected = image.detect_dm(dmd)
             if dm_is_detected:
@@ -74,6 +73,10 @@ class Processor:
             else:
                 print('Data Matrix not found:', image_path)
                 folder_structure.move_to_unsuccessful(image_path)
+
+        # Images processing: labeling
+        source_photos_manual = photo_source.ream_manual(folder_structure)
+
                 
 
         # cv2.imshow('with name', img_with_name)
