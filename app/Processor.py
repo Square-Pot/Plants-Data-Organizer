@@ -67,6 +67,7 @@ class Processor:
                 image.add_plant_labels()
                 if image.output_image is not None:
                     folder_structure.save_image_to_output(image)
+                    folder_structure.dispose_original(image)
                 else:
                     print('Data Matrix was not decoded', image_path)
                     folder_structure.move_to_unsuccessful(image_path)

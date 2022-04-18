@@ -34,11 +34,25 @@ class FolderStructure:
             os.path.join(self.unsuccessful_folder, os.path.basename(file_path))
         )
 
+    def dispose_original(self, image):
+        if int(self.config['MAIN']['delete_processed_files']):
+            os.remove(image.path_to_original)
+        else: 
+            self.__create_successful_dir()
+            os.replace(
+                image.path_to_original, 
+                os.path.join(
+                    self.successful_folder,
+                    os.path.basename(image.path_to_original)
+                )
+            )
+            
+
     @staticmethod
     def __create_photo_filename(uid: str, dt, extension):
         filename_list = [
             uid,
-            dt.strftime('%Y-%m-%d')
+            dt.strftime('%Y-%m-%d_%H-%M-%S')
         ]
         filename_str = '_'.join(filename_list)
         filename_str += extension
@@ -68,7 +82,12 @@ class FolderStructure:
                 )
                 cv2.imwrite(file_path, image.output_image)
                 print('Saved image:', file_path)
-    
+
+    def __create_successful_dir(self):
+        self.successful_folder = os.path.join(self.input_folder, 'successful')
+        if not os.path.exists(self.successful_folder):
+            os.mkdir(self.successful_folder)
+
     def __create_unsuccessful_dir(self):
         self.unsuccessful_folder = os.path.join(self.input_folder, 'unsuccessful')
         if not os.path.exists(self.unsuccessful_folder):
