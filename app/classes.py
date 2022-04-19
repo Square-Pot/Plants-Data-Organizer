@@ -1,6 +1,8 @@
+import os
 import cv2
 import numpy as np
 import random
+import re
 
 from .utils import image_resize
 from .utils import decode_data_matrix
@@ -67,7 +69,7 @@ class DataMatrix:
 
 
 class TargetImage:
-    def __init__(self, path_to_original: str, config):
+    def __init__(self, path_to_original: str, config, detected_manual=False):
         self.path_to_original = path_to_original
         self.image = cv2.imread(self.path_to_original)
         self.config = config
@@ -75,6 +77,7 @@ class TargetImage:
         if resize:
             size = int(config['MAIN']['output_width'])
             self.image = self.get_image_resized(size)
+        self.detected_manual = detected_manual
         self.data_matrices = None
         self.shooting_date = None
         self.__get_shooting_date()
@@ -100,14 +103,48 @@ class TargetImage:
             for dm in self.data_matrices:
                 dm.decode(db)
 
+    def __get_age(self):
+        seeding_date = get_seeding_date(self.db_data)
+        if seeding_date and self.shooting_date:
+            self.age_td = self.shooting_date - seeding_date
+            age_days = self.age_td.days
+            
+            years = age_days // 365
+            months = (age_days % 365) // 30
+            days = (age_days % 365) % 30
+
+            age_str = ''
+            if years:
+                age_str += '%sy ' % years
+            if months:
+                age_str += '%sm ' % months
+            if days:
+                age_str += '%sd ' % days
+
+            self.age_str = age_str
+
+    def __get_fansy_name(self):
+        self.__get_age()
+        self.fancy_name = get_fancy_name(self.db_data, self.age_str)
+
+    def set_db_object(self, db_object):
+        self.db = db_object
+
     def extract_db_data(self):
-        if self.data_matrices:
-            for dm in self.data_matrices:
-                if dm.decoded_successful:
-                    dm.extract_db_data(self.shooting_date)
+        if self.detected_manual:
+            print(self.path_to_original)
+            uid = re.search(r'^.+\/(\d+)_.+$', self.path_to_original).group(1)
+            if self.db.key_exist(uid):
+                self.db_data = self.db.get_item(uid)
+                self.__get_fansy_name()
+        else:
+            if self.data_matrices:
+                for dm in self.data_matrices:
+                    if dm.decoded_successful:
+                        dm.extract_db_data(self.shooting_date)
 
 
-    def add_plant_labels(self, manual_label: str = None):
+    def add_plant_labels(self):
 
         dmtxs = []
         if self.data_matrices:
@@ -116,7 +153,7 @@ class TargetImage:
                     dmtxs.append(dm)
 
 
-        if dmtxs or manual_label:
+        if dmtxs or self.detected_manual:
 
             # font style
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -128,21 +165,16 @@ class TargetImage:
                 (0, 0, 200),
                 (0, 200, 0),
                 (200, 0, 0),
-                (200, 200, 0),
+                (200, 130, 0),
                 (200, 0, 200),
                 (0, 200, 200),
             ]
 
             ## Manual detected labeling
-            if manual_label:
-
-                text_items = [manual_label]
-
-                # number of text lines
-                lines_num = 1
+            if self.detected_manual:
 
                 # calculate text bounding box size
-                label_size = cv2.getTextSize(manual_label, font, font_scale, font_thickness)
+                label_size = cv2.getTextSize(self.fancy_name, font, font_scale, font_thickness)
                 label_h = line_h = label_size[0][1]
                 label_w = label_size[0][0]
 
@@ -182,25 +214,6 @@ class TargetImage:
                 text_origin_y = h - line_h * lines_num
 
 
-                # draw bounding boxex
-                for dmtx in dmtxs: 
-
-                    # calculate scale factor for bounding frames
-                    dm_parent_img_width = dm.parent_image_shape[0]
-                    output_image_width = output_image.shape[0]
-                    scale_factor = output_image_width / dm_parent_img_width
-
-                    # draw boxex
-                    padding = 5
-                    cv2.rectangle(
-                        output_image,
-                        (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
-                        (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
-                        markers_colors[color_index], 
-                        5
-                    )
-
-
             # adjust font scale if label is not fit in image
             if label_w > w:
                 font_scale = w/label_w
@@ -220,47 +233,68 @@ class TargetImage:
             # putting the image back to its position
             output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
 
-            colors = [
-                (0, 0, 200),
-                (0, 200, 0),
-                (200, 0, 0),
-                (200, 130, 0),
-                (200, 0, 200),
-                (0, 200, 200),
-            ]
             color_indexes = list(range(len(markers_colors)))
 
-            for text_line in text_items:
+            if self.detected_manual:
                 # put text name
                 cv2.putText(
                     img=output_image, 
-                    text=text_line, 
+                    text=self.fancy_name, 
                     org=(int(text_origin_x), int(text_origin_y)), 
                     fontFace=font, 
                     fontScale=font_scale, 
                     color=font_color,
                     thickness=font_thickness
                 )
-                
-                # get marker color
-                if not color_indexes:
-                    color_indexes = list(range(len(markers_colors)))
-                color_index = random.choice(color_indexes)
-                color_indexes.remove(color_index)
+                self.output_image = output_image
 
-                # put marker
-                cv2.putText(
-                    img=output_image, 
-                    text='#', 
-                    org=(int(text_origin_x) - 40, int(text_origin_y)), 
-                    fontFace=cv2.FONT_HERSHEY_DUPLEX, 
-                    fontScale=font_scale, 
-                    color=markers_colors[color_index],
-                    thickness=font_thickness
-                )
+            elif dmtxs:
+                for dmtx in dmtxs:
+                    # put text name
+                    cv2.putText(
+                        img=output_image, 
+                        text=dmtx.fancy_name, 
+                        org=(int(text_origin_x), int(text_origin_y)), 
+                        fontFace=font, 
+                        fontScale=font_scale, 
+                        color=font_color,
+                        thickness=font_thickness
+                    )
+                    
+                    # get marker color
+                    if not color_indexes:
+                        color_indexes = list(range(len(markers_colors)))
+                    color_index = random.choice(color_indexes)
+                    color_indexes.remove(color_index)
 
-                text_origin_y += line_h
-            self.output_image = output_image
+                    # put marker
+                    cv2.putText(
+                        img=output_image, 
+                        text='#', 
+                        org=(int(text_origin_x) - 40, int(text_origin_y)), 
+                        fontFace=cv2.FONT_HERSHEY_DUPLEX, 
+                        fontScale=font_scale, 
+                        color=markers_colors[color_index],
+                        thickness=font_thickness
+                    )
+
+                    text_origin_y += line_h
+
+                    # calculate scale factor for bounding frames
+                    dm_parent_img_width = dm.parent_image_shape[0]
+                    output_image_width = output_image.shape[0]
+                    scale_factor = output_image_width / dm_parent_img_width
+
+                    # draw boxex
+                    padding = 5
+                    cv2.rectangle(
+                        output_image,
+                        (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
+                        (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
+                        markers_colors[color_index], 
+                        5
+                    )
+                self.output_image = output_image
 
 
                 

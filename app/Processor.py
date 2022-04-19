@@ -75,7 +75,17 @@ class Processor:
                 folder_structure.move_to_unsuccessful(image_path)
 
         # Images processing: labeling
-        source_photos_manual = photo_source.ream_manual(folder_structure)
+        source_photos_manual = photo_source.read_manual(folder_structure)
+        for image_path in source_photos_manual:
+            image = TargetImage(image_path, self.config, detected_manual=True)
+            image.set_db_object(self.db)
+            image.extract_db_data()
+            if image.output_image is not None:
+                folder_structure.save_image_to_output(image)
+                folder_structure.dispose_original(image)
+
+
+
 
                 
 
