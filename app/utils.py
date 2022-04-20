@@ -1,6 +1,8 @@
 import datetime
 import re
 import copy
+from this import d
+from turtle import pu
 import cv2
 from pylibdmtx import pylibdmtx
 from PIL import Image
@@ -97,9 +99,12 @@ def get_fancy_name(data: dict, age=None) -> list:
 
     return name
 
-def get_seeding_date(data: dict) -> datetime.datetime:
-    if __not_empty(data, 'seeding_date'):
-        date_string = data['seeding_date'].strip()
+def get_date(data: dict, date_field_name: str) -> datetime.datetime.date:
+    """
+    Returns date field as datetime.datetime from db_data dictionary
+    """
+    if __not_empty(data, date_field_name):
+        date_string = data[date_field_name].strip()
         if re.match(r'\d{2}\.\d{2}\.\d{4}', date_string):
             return datetime.datetime.strptime(date_string, '%d.%m.%Y')
         elif re.match(r'\d{4}-\d{2}-\d{2}', date_string):
@@ -108,6 +113,49 @@ def get_seeding_date(data: dict) -> datetime.datetime:
             return None
     else:
         return None
+
+def get_seeding_date(data: dict) -> datetime.datetime:
+    """
+    Returns 'seeding_date' as datetime.datetime
+    """
+    return get_date(data, 'seeding_date')
+
+
+def get_purchase_date(data: dict) -> datetime.datetime:
+    """
+    Returns 'purchase_date' as datetime.datetime
+    """
+    return get_date(data, 'purchase_date')
+
+def get_age(db_data, shooting_date):
+    """
+    Returns age as string. If seeding date is not available, it's trying 
+    to calculate age since purchase date (and message about it is added)
+    """
+    seeding_date = first_date = get_seeding_date(db_data)
+    if not seeding_date:
+        purchase_date = first_date = get_purchase_date(db_data)
+        if not purchase_date:
+            return None
+    
+    age_dt = shooting_date - first_date
+    age_days = age_dt.days
+    years = age_days // 365
+    months = (age_days % 365) // 30
+    days = (age_days % 365) % 30
+
+    age_str = ''
+    if years:
+        age_str += '%sy ' % years
+    if months:
+        age_str += '%sm ' % months
+    if days:
+        age_str += '%sd ' % days
+
+    if not seeding_date:
+        age_str += 'since purchase '
+    return age_str
+
 
 def get_shooting_date(image):
     """Get date when a photo was taken from EXIF"""

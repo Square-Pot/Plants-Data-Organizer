@@ -23,8 +23,7 @@ class DataMatrix:
         self.age_td = None
         self.age_str = None
 
-    def decode(self,  db):
-        self.db = db
+    def decode(self):
         info, rect = decode_data_matrix(self.image)
         if info: 
             self.decoded_successful = True
@@ -43,25 +42,6 @@ class DataMatrix:
         if self.db.key_exist(uid):
             self.db_data = self.db.get_item(uid)
 
-    def __get_age(self):
-        seeding_date = get_seeding_date(self.db_data)
-        if seeding_date and self.shooting_date:
-            self.age_td = self.shooting_date - seeding_date
-            age_days = self.age_td.days
-            
-            years = age_days // 365
-            months = (age_days % 365) // 30
-            days = (age_days % 365) % 30
-
-            age_str = ''
-            if years:
-                age_str += '%sy ' % years
-            if months:
-                age_str += '%sm ' % months
-            if days:
-                age_str += '%sd ' % days
-
-            self.age_str = age_str
 
     def __get_fansy_name(self):
         self.__get_age()
@@ -69,7 +49,7 @@ class DataMatrix:
 
 
 class TargetImage:
-    def __init__(self, path_to_original: str, config, detected_manual=False):
+    def __init__(self, path_to_original: str, config):
         self.path_to_original = path_to_original
         self.image = cv2.imread(self.path_to_original)
         self.config = config
@@ -77,31 +57,82 @@ class TargetImage:
         if resize:
             size = int(config['MAIN']['output_width'])
             self.image = self.get_image_resized(size)
-        self.detected_manual = detected_manual
         self.data_matrices = None
+        self.decoded_uids = []  # ?
+        self.db_data = None
         self.shooting_date = None
-        self.__get_shooting_date()
         self.output_image = None
+        
 
-    def __get_shooting_date(self):
-        self.shooting_date = get_shooting_date(self.path_to_original)
-
-    def get_image_resized(self, width):
-        return image_resize(self.image, width=width)
-
-    def detect_dm(self, data_matrix_detector):
+    def detect_dm(self, data_matrix_detector) -> None:
+        """
+        Detects data matrices on the photo.
+        Save result as list of DataMatrix objects.
+        """
         data_matrix_detector.detect(self.image)
         data_matrices = data_matrix_detector.get_result()
         if data_matrices:
             self.data_matrices = data_matrices
-            return True
-        else:
-            return False
 
-    def decode_dm(self, db):
+    def decode_dm(self, db) -> None:
+        """
+        Decoding of detected data matrices
+        Result is storing in DataMatrix objects.
+        """
+        bad_dmtxs = []
         if self.data_matrices:
             for dm in self.data_matrices:
                 dm.decode(db)
+                if dm.decoded_successful:
+                    self.decoded_uids.append(dm.decoded_info)
+                else:
+                    bad_dmtxs.append(dm)
+        # remove unsuccessful detected DataMatrix objects from list 
+        for dm in bad_dmtxs:
+            self.data_matrices.pop(dm)
+
+    def decode_path(self) -> None:
+        """
+        Extracting UID from file path
+        """
+        uid = re.search(r'^.+\/(\d+)_.+$', self.path_to_original).group(1)
+        if uid:
+            self.decoded_uids.append(uid)
+        else:
+            print("Can't extract UID from file path %s" % self.path_to_original)
+
+    def add_shooting_date(self):
+        """
+        Add shooting date to Image object from EXIF
+        """
+        self.shooting_date = get_shooting_date(self.path_to_original)
+
+    def extract_db_data(self, db):
+        """
+        Extract data from DB by uid as dictionary.
+        For Images with data matrices - the data will be stores in DataMatrix object.
+        For Images with UID extracted from path will be stored in self.db_data value
+        """
+        if self.data_matrices:
+            for dm in self.data_matrices:
+                dm.extract_db_data(db, self.shooting_date)
+        elif self.decoded_uids:
+            if self.db.key_exist(self.decoded_uids[0]):
+                self.db_data = self.db.get_item(self.decoded_uids[0])
+
+    def generate_labels(self):
+        self.age = get_age
+        self.label_text = get_fancy_name(self.db_data, age)
+
+
+        
+
+    def get_image_resized(self, width):
+        return image_resize(self.image, width=width)
+
+
+
+    
 
     def __get_age(self):
         seeding_date = get_seeding_date(self.db_data)
@@ -130,27 +161,15 @@ class TargetImage:
     def set_db_object(self, db_object):
         self.db = db_object
 
-    def extract_db_data(self):
-        if self.detected_manual:
-            print(self.path_to_original)
-            uid = re.search(r'^.+\/(\d+)_.+$', self.path_to_original).group(1)
-            if self.db.key_exist(uid):
-                self.db_data = self.db.get_item(uid)
-                self.__get_fansy_name()
-        else:
-            if self.data_matrices:
-                for dm in self.data_matrices:
-                    if dm.decoded_successful:
-                        dm.extract_db_data(self.shooting_date)
 
 
-    def add_plant_labels(self):
+
+    def place_labels_on_image(self):
 
         dmtxs = []
         if self.data_matrices:
             for dm in self.data_matrices:
-                if dm.decoded_successful:
-                    dmtxs.append(dm)
+                dmtxs.append(dm)
 
 
         if dmtxs or self.detected_manual:
@@ -302,3 +321,6 @@ class TargetImage:
 
 
     
+# if self.db.key_exist(uid):
+#             self.db_data = self.db.get_item(uid)
+#             self.__get_fansy_name()

@@ -14,7 +14,12 @@ class FolderStructure:
         self.current_structure = {}
         self.unsuccessful_folder = None
 
-    def check(self, db_object):
+    def sync_with_db(self, db_object):
+        """
+        |   Create or update folder structure in 'output_folder'
+        |   according to DB structure.
+        |   Remember: DB is MASTER, folder structure is SLAVE
+        """
         self.db = db_object
         if self.output_folder_is_exist:
             self.__update_structure()

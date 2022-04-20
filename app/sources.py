@@ -35,7 +35,7 @@ class Source:
         |   placed manually 
         """
         output_folder = self.config['PATHS']['output_folder']
-        manual_detected_folder = self.config['PATHS']['manual_detected_folder']
+        label_required_folder_name = self.config['PATHS']['label_required_folder_name']
         current_structure = folder_structure_object.get_current_structure()
         
         input_photos = []
@@ -44,7 +44,7 @@ class Source:
             item_path = os.path.join(
                 output_folder,
                 item_folder,
-                manual_detected_folder
+                label_required_folder_name
             )
             item_files = os.listdir(item_path)
             for filename in item_files:
