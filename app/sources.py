@@ -15,8 +15,12 @@ class Source:
         Recurcively! 
         """
         paths_file_path = self.config['PATHS']['paths_file']
-        with open(paths_file_path, 'r') as f:
-            lines = f.readlines()
+        if os.path.isdir(paths_file_path):
+            with open(paths_file_path, 'r') as f:
+                lines = f.readlines()
+        else: 
+            print('Paths-file is not found')
+            return []
 
         source_paths = []
         for line in lines:
