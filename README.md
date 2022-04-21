@@ -1,9 +1,18 @@
+<!-- markdownlint-configure-file {
+  "MD013": {
+    "code_blocks": false,
+    "tables": false
+  },
+  "MD033": false,
+  "MD041": false
+} -->
+
 <div align="center"
 
 # Data Matrix File Sorter and Image Labeler
 
 App for recognition data matrices, sorting files, labeling photos.
-(Name is temporary)
+<br /> (Name is temporary)
 
 [Description](#description) •
 [Image Sources](#image-sources) •
@@ -17,6 +26,6 @@ App for recognition data matrices, sorting files, labeling photos.
 Description will be here
 
 
-## Image sourcese
+## Image sources
 
 Description on sources will be here

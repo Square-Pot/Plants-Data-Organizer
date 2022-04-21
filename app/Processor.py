@@ -62,7 +62,7 @@ class Processor:
         """
         valid_detection_methods = {'datamatrix', 'path'}
         if detection_method not in valid_detection_methods:
-            raise ValueError("results: status must be one of %r." % valid)
+            raise ValueError("results: status must be one of %r." % valid_detection_methods)
 
         image = TargetImage(image_path, self.config)
 
