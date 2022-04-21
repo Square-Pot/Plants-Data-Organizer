@@ -45,7 +45,7 @@ class Processor:
                 self.__process_image(image_path, detection_method='datamatrix', dispose=True)
 
         # Process images from 'output' source
-        source_3_output = image_source.from_output()
+        source_3_output = image_source.from_output(self.folders)
         if source_3_output: 
             for image_path in source_3_output:
                 self.__process_image(image_path, detection_method='path', dispose=True)
