@@ -1,14 +1,19 @@
-import os
+#import os
 import cv2
-import numpy as np
 import random
 import re
 
-from .utils import image_resize
+from .utils import get_valid_colors, image_resize
 from .utils import decode_data_matrix
-from .utils import get_fancy_name
-from .utils import get_seeding_date
+from .utils import create_label_text
+#from .utils import get_seeding_date
 from .utils import get_shooting_date
+from .utils import get_age
+from .utils import get_text_origin_size
+from .utils import draw_label_bgnd
+from .utils import get_valid_colors
+from .utils import put_text_on_image
+
 
 class DataMatrix:
     def __init__(self):
@@ -19,11 +24,11 @@ class DataMatrix:
         self.decoded_successful: bool = None
         self.decoded_info: str = None
         self.db_data = None
-        self.fancy_name = None
-        self.age_td = None
-        self.age_str = None
+        self.age: str = None
+        self.label_text: str = None
 
     def decode(self):
+        """ Decode Data Matrix to get UID """
         info, rect = decode_data_matrix(self.image)
         if info: 
             self.decoded_successful = True
@@ -33,19 +38,16 @@ class DataMatrix:
             self.decoded_successful = False
 
     def extract_db_data(self, shooting_date):
-        self.shooting_date = shooting_date
-        self.__get_db_data()
-        self.__get_fansy_name()
-
-    def __get_db_data(self):
+        """ Extract data from DB by decoded uid  """
         uid = self.decoded_info
         if self.db.key_exist(uid):
             self.db_data = self.db.get_item(uid)
 
+    def generate_labels(self, shooting_date):
+        """ Create label text wich contains 'label_text' value """
+        self.age = get_age(self.db_data, shooting_date)
+        self.label_text = create_label_text(self.db_data, self.age_str, source=True)
 
-    def __get_fansy_name(self):
-        self.__get_age()
-        self.fancy_name = get_fancy_name(self.db_data, self.age_str)
 
 
 class TargetImage:
@@ -61,8 +63,8 @@ class TargetImage:
         self.decoded_uids = []  # ?
         self.db_data = None
         self.shooting_date = None
+        self.label_text = None
         self.output_image = None
-        
 
     def detect_dm(self, data_matrix_detector) -> None:
         """
@@ -76,7 +78,7 @@ class TargetImage:
 
     def decode_dm(self, db) -> None:
         """
-        Decoding of detected data matrices
+        Decoding of detected data matrices.
         Result is storing in DataMatrix objects.
         """
         bad_dmtxs = []
@@ -92,9 +94,7 @@ class TargetImage:
             self.data_matrices.pop(dm)
 
     def decode_path(self) -> None:
-        """
-        Extracting UID from file path
-        """
+        """ Extracting UID from file path """
         uid = re.search(r'^.+\/(\d+)_.+$', self.path_to_original).group(1)
         if uid:
             self.decoded_uids.append(uid)
@@ -102,9 +102,7 @@ class TargetImage:
             print("Can't extract UID from file path %s" % self.path_to_original)
 
     def add_shooting_date(self):
-        """
-        Add shooting date to Image object from EXIF
-        """
+        """  Add shooting date to Image object from EXIF """
         self.shooting_date = get_shooting_date(self.path_to_original)
 
     def extract_db_data(self, db):
@@ -121,206 +119,72 @@ class TargetImage:
                 self.db_data = self.db.get_item(self.decoded_uids[0])
 
     def generate_labels(self):
-        self.age = get_age
-        self.label_text = get_fancy_name(self.db_data, age)
-
-
-        
-
-    def get_image_resized(self, width):
-        return image_resize(self.image, width=width)
-
-
-
-    
-
-    def __get_age(self):
-        seeding_date = get_seeding_date(self.db_data)
-        if seeding_date and self.shooting_date:
-            self.age_td = self.shooting_date - seeding_date
-            age_days = self.age_td.days
-            
-            years = age_days // 365
-            months = (age_days % 365) // 30
-            days = (age_days % 365) % 30
-
-            age_str = ''
-            if years:
-                age_str += '%sy ' % years
-            if months:
-                age_str += '%sm ' % months
-            if days:
-                age_str += '%sd ' % days
-
-            self.age_str = age_str
-
-    def __get_fansy_name(self):
-        self.__get_age()
-        self.fancy_name = get_fancy_name(self.db_data, self.age_str)
-
-    def set_db_object(self, db_object):
-        self.db = db_object
-
-
-
-
-    def place_labels_on_image(self):
-
-        dmtxs = []
+        """
+        Create label text wich contains:
+        * in 'self.label_text'  value if detection was by path
+        * in 'DataMatrix.label_text' value if detection was by Data Matrix
+        """
         if self.data_matrices:
             for dm in self.data_matrices:
-                dmtxs.append(dm)
+                dm.generate_labels(self.shooting_date)
+        else:
+            self.age = get_age(self.db_data, self.shooting_date)
+            self.label_text = create_label_text(self.db_data, self.age, True)
 
+    def get_image_resized(self, width):
+        """ Returns image with resized by widht saving proportions """
+        return image_resize(self.image, width=width)
 
-        if dmtxs or self.detected_manual:
+    def place_labels_on_image(self):
+        """
+        Placing label on the image, color markers and bounding boxes around 
+        data matrices, if they were detected.
+        """
 
-            # font style
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = int(self.config['LABELS']['font_scale'])
-            font_color = tuple(int(i) for i in self.config['LABELS']['font_color'].split(','))
-            font_thickness = int(self.config['LABELS']['font_thickness'])
-            text_origin_x_value = 100
-            markers_colors = [
-                (0, 0, 200),
-                (0, 200, 0),
-                (200, 0, 0),
-                (200, 130, 0),
-                (200, 0, 200),
-                (0, 200, 200),
-            ]
+        text_origin, text_boundig_size, text_line_heigh = get_text_origin_size(self.config, self.output_image, self.label_text)
+        output_image = draw_label_bgnd(self.config, self.image.copy(), text_origin, text_boundig_size)
 
-            ## Manual detected labeling
-            if self.detected_manual:
+        interline_factor = float(self.config['LABELS']['interline_factor'])
+        markers_colors = get_valid_colors()
+        color_indexes = list(range(len(markers_colors)))
 
-                # calculate text bounding box size
-                label_size = cv2.getTextSize(self.fancy_name, font, font_scale, font_thickness)
-                label_h = line_h = label_size[0][1]
-                label_w = label_size[0][0]
+        if self.data_matrices:
+            for dmtx in self.data_matrices:
+                # put label text on image
+                output_image = put_text_on_image(self.config, output_image, dmtx.label_text, text_origin)
 
-                # calculate text origin
-                output_image = self.image.copy()
-                h, w = output_image.shape[:2]
-                text_origin_x = text_origin_x_value
-                text_origin_y = h - line_h
+                # get marker color
+                if not color_indexes:
+                    color_indexes = list(range(len(markers_colors)))
+                color_index = random.choice(color_indexes)
+                color_indexes.remove(color_index)
+                marker_color = markers_colors[color_index]
 
-            ## Auto detecting, decoding, labeling
-            elif dmtxs:
+                # put marker on image
+                marker_origin = (text_origin[0]-40, text_origin[1]) 
+                output_image = put_text_on_image(self.config, output_image, '#', marker_origin, marker_color)
 
-                text_items = dmtxs
+                # shift 'cursor' one line upper
+                text_origin[1] -= text_line_heigh * interline_factor
 
-                # number of text lines
-                lines_num = len(dmtxs)
+                # calculate scale factor for bounding frames
+                dm_parent_img_width = dmtx.parent_image_shape[0]
+                output_image_width = output_image.shape[0]
+                scale_factor = output_image_width / dm_parent_img_width
 
-                # calculate text bounding box size
-                line_h  = 0
-                label_h = 0
-                label_w = 0 
-                for text_line in text_items: 
-                    label_size = cv2.getTextSize(text_line, font, font_scale, font_thickness)
-                    label_h += label_size[0][1]
-                    if label_size[0][1] > line_h:
-                        line_h = label_size[0][1]
-                    if label_size[0][0] > label_w:
-                        label_w = label_size[0][0]
-
-                # interline factor
-                line_h = line_h * 1.6
-
-                # calculate text origin
-                output_image = self.image.copy()
-                h, w = output_image.shape[:2]
-                text_origin_x = text_origin_x_value
-                text_origin_y = h - line_h * lines_num
-
-
-            # adjust font scale if label is not fit in image
-            if label_w > w:
-                font_scale = w/label_w
-
-            # calculate background origin and size 
-            margin = 5
-            bgnd_x1 = text_origin_x - 60
-            bgnd_y1 = int(text_origin_y - line_h)
-            bgnd_x2 = int(label_w) + bgnd_x1 + 60 + margin
-            bgnd_y2 = int(line_h * lines_num) + bgnd_y1 + 2 * margin
-
-            # crop the background rect 
-            sub_img = output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
-            black_rect = np.ones(sub_img.shape, dtype=np.uint8) * 0
-            res = cv2.addWeighted(sub_img, 0.5, black_rect, 0.5, 1.0)
-
-            # putting the image back to its position
-            output_image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
-
-            color_indexes = list(range(len(markers_colors)))
-
-            if self.detected_manual:
-                # put text name
-                cv2.putText(
-                    img=output_image, 
-                    text=self.fancy_name, 
-                    org=(int(text_origin_x), int(text_origin_y)), 
-                    fontFace=font, 
-                    fontScale=font_scale, 
-                    color=font_color,
-                    thickness=font_thickness
+                # draw bounding boxex around detected data matrices
+                padding = self.config['LABELS']['bounding_box_padding']
+                bbox_thickness = self.config['LABELS']['bounding_box_thickness']
+                cv2.rectangle(
+                    output_image,
+                    (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
+                    (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
+                    markers_colors[color_index], 
+                    bbox_thickness
                 )
-                self.output_image = output_image
+            self.output_image = output_image
 
-            elif dmtxs:
-                for dmtx in dmtxs:
-                    # put text name
-                    cv2.putText(
-                        img=output_image, 
-                        text=dmtx.fancy_name, 
-                        org=(int(text_origin_x), int(text_origin_y)), 
-                        fontFace=font, 
-                        fontScale=font_scale, 
-                        color=font_color,
-                        thickness=font_thickness
-                    )
-                    
-                    # get marker color
-                    if not color_indexes:
-                        color_indexes = list(range(len(markers_colors)))
-                    color_index = random.choice(color_indexes)
-                    color_indexes.remove(color_index)
-
-                    # put marker
-                    cv2.putText(
-                        img=output_image, 
-                        text='#', 
-                        org=(int(text_origin_x) - 40, int(text_origin_y)), 
-                        fontFace=cv2.FONT_HERSHEY_DUPLEX, 
-                        fontScale=font_scale, 
-                        color=markers_colors[color_index],
-                        thickness=font_thickness
-                    )
-
-                    text_origin_y += line_h
-
-                    # calculate scale factor for bounding frames
-                    dm_parent_img_width = dm.parent_image_shape[0]
-                    output_image_width = output_image.shape[0]
-                    scale_factor = output_image_width / dm_parent_img_width
-
-                    # draw boxex
-                    padding = 5
-                    cv2.rectangle(
-                        output_image,
-                        (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),
-                        (int(dmtx.bbox[0][2] * scale_factor) - padding, int(dmtx.bbox[0][3] * scale_factor) - padding), 
-                        markers_colors[color_index], 
-                        5
-                    )
-                self.output_image = output_image
-
-
-                
-
-
-
-    
-# if self.db.key_exist(uid):
-#             self.db_data = self.db.get_item(uid)
-#             self.__get_fansy_name()
+        elif self.label_text:
+            # put label text on image
+            output_image = put_text_on_image(self.config, output_image, self.label_text, text_origin)
+            self.output_image = output_image
