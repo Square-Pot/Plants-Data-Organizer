@@ -39,7 +39,6 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # return the resized image
     return resized
 
-
 def decode_data_matrix(image) -> str:
     """
     | 
@@ -60,7 +59,6 @@ def __not_empty(data, field_name):
         return True
     else:
         return False
-
 
 def get_fancy_name(data: dict, age=None) -> list:
     
@@ -99,7 +97,7 @@ def get_fancy_name(data: dict, age=None) -> list:
 
     return name
 
-def get_date(data: dict, date_field_name: str) -> datetime.datetime.date:
+def get_date(data: dict, date_field_name: str):
     """
     Returns date field as datetime.datetime from db_data dictionary
     """
@@ -120,14 +118,13 @@ def get_seeding_date(data: dict) -> datetime.datetime:
     """
     return get_date(data, 'seeding_date')
 
-
 def get_purchase_date(data: dict) -> datetime.datetime:
     """
     Returns 'purchase_date' as datetime.datetime
     """
     return get_date(data, 'purchase_date')
 
-def get_age(db_data, shooting_date):
+def get_age(db_data, shooting_date) -> str:
     """
     Returns age as string. If seeding date is not available, it's trying 
     to calculate age since purchase date (and message about it is added)
@@ -155,7 +152,6 @@ def get_age(db_data, shooting_date):
     if not seeding_date:
         age_str += 'since purchase '
     return age_str
-
 
 def get_shooting_date(image):
     """Get date when a photo was taken from EXIF"""
