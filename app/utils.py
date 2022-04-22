@@ -1,9 +1,7 @@
 import datetime
 import re
-import copy
-from this import d
-from turtle import pu
 import cv2
+import numpy as np
 from pylibdmtx import pylibdmtx
 from PIL import Image
 
@@ -53,24 +51,20 @@ def decode_data_matrix(image) -> str:
         return None, None
 
 def __not_empty(data, field_name):
-    if data and \
-            field_name in data and        \
-            data[field_name] and     \
+    if data and                         \
+            field_name in data and      \
+            data[field_name] and        \
             data[field_name] != 'None':
         return True
     else:
         return False
 
 
-def get_fancy_name(data: dict, age=None) -> list:
-    
-    # name = []
-    # if __not_empty(data, 'number'):
-    #     name.append({
-    #         'content': data['number'] + ' ',
-    #         'style': 'regular'
-    #     })
-
+def create_label_text(data: dict, age: str = None, source: bool = False) -> str:
+    """
+    Returns label text as string. 
+    Age and source can be also added as parameters.
+    """
     name = ''
 
     if __not_empty(data, 'number'):
@@ -93,6 +87,11 @@ def get_fancy_name(data: dict, age=None) -> list:
 
     if age:
         name += '| Age: %s' % age
+
+    if source:
+        if __not_empty(data, 'cultivar'):
+            source_text  += data['source']
+            name += '| Seed source: %s' % source_text
 
     if __not_empty(data, 'UID'):
         name += ' [%s]' % data['UID']
@@ -173,6 +172,98 @@ def get_shooting_date(image):
     else:
         print('No shooting date in EXIF')
         return None
+
+def get_text_origin_size(config, image, label_lines: list) -> tuple:
+    """ 
+    Returns: 
+    * text origin as tuple (x, y)  - bottom left corner of text 
+    * text size as tupe (width, heigh)
+    """
+    font = int(config['LABELS']['font'])
+    font_scale = int(config['LABELS']['font_scale'])
+    font_thickness = int(config['LABELS']['font_thickness'])
+    interline_factor = float(config['LABELS']['interline_factor'])
+    text_origin_x_value = int(config['LABELS']['text_origin_x'])
+
+    h, w = image.shape[:2]
+
+    # calculate text bounding box size
+    text_line_heigh  = 0
+    label_w = 0 
+    for text_line in label_lines: 
+        label_size = cv2.getTextSize(text_line, font, font_scale, font_thickness)
+
+         # adjust font scale if label is not fit in image
+        if label_size[0][0] > w:
+            font_scale = w/label_size[0][0]
+            label_size = cv2.getTextSize(text_line, font, font_scale, font_thickness)
+
+        text_line_heigh = label_size[0][1]
+        if label_size[0][0] > label_w:
+            label_w = label_size[0][0]
+    label_h = text_line_heigh * len(label_lines) * interline_factor
+
+    # calculate text origin
+    text_origin_x = text_origin_x_value
+    text_origin_y = h - text_line_heigh
+
+    return (text_origin_x, text_origin_y), (label_w, label_h), text_line_heigh
+
+def draw_label_bgnd(config, image, origin, size):
+    """
+    Drawing background with opacity with size it relation with text
+    """
+    padding = int(config['LABELS']['background_padding'])
+    marker_space = int(config['LABELS']['marker_space'])
+
+    # calculate rectangle point coordinates
+    bgnd_x1 = int(origin[0] - marker_space)
+    bgnd_y1 = int(origin[1] - size[1] - padding)
+    bgnd_x2 = int(size[0] + bgnd_x1 + marker_space + padding)
+    bgnd_y2 = int(origin[1] - size[1] + bgnd_y1 + 2 * padding)
+
+    # crop the background rect 
+    sub_img = image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
+    black_rect = np.ones(sub_img.shape, dtype=np.uint8) * 0
+    res = cv2.addWeighted(sub_img, 0.5, black_rect, 0.5, 1.0)
+
+    # putting the image back to its position
+    image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2] = res
+    
+    return image
+
+def get_valid_colors() -> list:
+    """ Returns list of valid colors (BGR) for markers and frames """
+    colors = [
+        (0, 0, 200),
+        (0, 200, 0),
+        (200, 0, 0),
+        (200, 130, 0),
+        (200, 0, 200),
+        (0, 200, 200),
+    ]
+    return colors
+
+def put_text_on_image(config, image, text, origin, font_color=None):
+
+    font = int(config['LABELS']['font'])
+    font_scale = int(config['LABELS']['font_scale'])
+    font_thickness = int(config['LABELS']['font_thickness'])
+    if not font_color:
+        font_color = tuple(int(i) for i in config['LABELS']['font_color'].split(','))
+
+    cv2.putText(
+        img=image, 
+        text=text, 
+        org=(int(origin[0]), int(origin[1])), 
+        fontFace=font, 
+        fontScale=font_scale, 
+        color=font_color,
+        thickness=font_thickness
+    )
+
+    return image
+
 
 
 if __name__ == '__main__':
