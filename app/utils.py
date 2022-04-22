@@ -50,7 +50,8 @@ def decode_data_matrix(image) -> str:
     else:
         return None, None
 
-def __not_empty(data, field_name):
+def __not_empty(data: dict, field_name: str) -> bool:
+    """  Check if field exists and contaits data in  data dictionary """
     if data and                         \
             field_name in data and      \
             data[field_name] and        \
@@ -90,7 +91,7 @@ def create_label_text(data: dict, age: str = None, source: bool = False) -> str:
 
     if source:
         if __not_empty(data, 'cultivar'):
-            source_text  += data['source']
+            source_text = data['source']
             name += '| Seed source: %s' % source_text
 
     if __not_empty(data, 'UID'):
@@ -99,9 +100,7 @@ def create_label_text(data: dict, age: str = None, source: bool = False) -> str:
     return name
 
 def get_date(data: dict, date_field_name: str) -> datetime.datetime.date:
-    """
-    Returns date field as datetime.datetime from db_data dictionary
-    """
+    """ Returns date field as datetime.datetime from db_data dictionary """
     if __not_empty(data, date_field_name):
         date_string = data[date_field_name].strip()
         if re.match(r'\d{2}\.\d{2}\.\d{4}', date_string):
@@ -114,16 +113,12 @@ def get_date(data: dict, date_field_name: str) -> datetime.datetime.date:
         return None
 
 def get_seeding_date(data: dict) -> datetime.datetime:
-    """
-    Returns 'seeding_date' as datetime.datetime
-    """
+    """ Returns 'seeding_date' as datetime.datetime """
     return get_date(data, 'seeding_date')
 
 
 def get_purchase_date(data: dict) -> datetime.datetime:
-    """
-    Returns 'purchase_date' as datetime.datetime
-    """
+    """ Returns 'purchase_date' as datetime.datetime """
     return get_date(data, 'purchase_date')
 
 def get_age(db_data, shooting_date):
@@ -245,6 +240,7 @@ def get_valid_colors() -> list:
     return colors
 
 def put_text_on_image(config, image, text, origin, font_color=None):
+    """ Put text line on image """
 
     font = int(config['LABELS']['font'])
     font_scale = int(config['LABELS']['font_scale'])
@@ -265,8 +261,5 @@ def put_text_on_image(config, image, text, origin, font_color=None):
     return image
 
 
-
 if __name__ == '__main__':
-    image = cv2.imread("/home/demetrius/Projects/DataMatrix-Sorter/app/experiments/train_dm.png")
-    info, rect = encode_data_matrix(image)
-    print(info)
+    pass
