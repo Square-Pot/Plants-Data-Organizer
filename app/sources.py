@@ -15,7 +15,7 @@ class Source:
         Recurcively! 
         """
         paths_file_path = self.config['PATHS']['paths_file']
-        if os.path.isdir(paths_file_path):
+        if os.path.exists(paths_file_path):
             with open(paths_file_path, 'r') as f:
                 lines = f.readlines()
         else: 

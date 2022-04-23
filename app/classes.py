@@ -37,17 +37,16 @@ class DataMatrix:
         else:
             self.decoded_successful = False
 
-    def extract_db_data(self, shooting_date):
+    def extract_db_data(self, db):
         """ Extract data from DB by decoded uid  """
         uid = self.decoded_info
-        if self.db.key_exist(uid):
-            self.db_data = self.db.get_item(uid)
+        if db.key_exist(uid):
+            self.db_data = db.get_item(uid)
 
     def generate_labels(self, shooting_date):
         """ Create label text wich contains 'label_text' value """
         self.age = get_age(self.db_data, shooting_date)
-        self.label_text = create_label_text(self.db_data, self.age_str, source=True)
-
+        self.label_text = create_label_text(self.db_data, self.age, source=True)
 
 
 class TargetImage:
@@ -63,7 +62,7 @@ class TargetImage:
         self.decoded_uids = []  # ?
         self.db_data = None
         self.shooting_date = None
-        self.label_text = None
+        self.label_text: str = None
         self.output_image = None
 
     def detect_dm(self, data_matrix_detector) -> None:
@@ -76,7 +75,7 @@ class TargetImage:
         if data_matrices:
             self.data_matrices = data_matrices
 
-    def decode_dm(self, db) -> None:
+    def decode_dm(self) -> None:
         """
         Decoding of detected data matrices.
         Result is storing in DataMatrix objects.
@@ -84,7 +83,7 @@ class TargetImage:
         bad_dmtxs = []
         if self.data_matrices:
             for dm in self.data_matrices:
-                dm.decode(db)
+                dm.decode()
                 if dm.decoded_successful:
                     self.decoded_uids.append(dm.decoded_info)
                 else:
@@ -113,10 +112,10 @@ class TargetImage:
         """
         if self.data_matrices:
             for dm in self.data_matrices:
-                dm.extract_db_data(db, self.shooting_date)
+                dm.extract_db_data(db)
         elif self.decoded_uids:
-            if self.db.key_exist(self.decoded_uids[0]):
-                self.db_data = self.db.get_item(self.decoded_uids[0])
+            if db.key_exist(self.decoded_uids[0]):
+                self.db_data = db.get_item(self.decoded_uids[0])
 
     def generate_labels(self):
         """
@@ -135,14 +134,23 @@ class TargetImage:
         """ Returns image with resized by widht saving proportions """
         return image_resize(self.image, width=width)
 
+    def __get_label_text_as_list(self):
+        label_text_list = []
+        if self.data_matrices:
+            for dm in self.data_matrices: 
+                label_text_list.append(dm.label_text)
+        elif self.label_text:
+            label_text_list.append(self.label_text)
+        return label_text_list
+
     def place_labels_on_image(self):
         """
         Placing label on the image, color markers and bounding boxes around 
         data matrices, if they were detected.
         """
-
-        text_origin, text_boundig_size, text_line_heigh = get_text_origin_size(self.config, self.output_image, self.label_text)
-        output_image = draw_label_bgnd(self.config, self.image.copy(), text_origin, text_boundig_size)
+        output_image = self.image.copy()
+        text_origin, text_boundig_size, text_line_heigh = get_text_origin_size(self.config, output_image, self.__get_label_text_as_list())
+        output_image = draw_label_bgnd(self.config, output_image, text_origin, text_boundig_size)
 
         interline_factor = float(self.config['LABELS']['interline_factor'])
         markers_colors = get_valid_colors()
@@ -165,7 +173,7 @@ class TargetImage:
                 output_image = put_text_on_image(self.config, output_image, '#', marker_origin, marker_color)
 
                 # shift 'cursor' one line upper
-                text_origin[1] -= text_line_heigh * interline_factor
+                text_origin = (text_origin[0], text_origin[1] - text_line_heigh * interline_factor)
 
                 # calculate scale factor for bounding frames
                 dm_parent_img_width = dmtx.parent_image_shape[0]
@@ -173,8 +181,8 @@ class TargetImage:
                 scale_factor = output_image_width / dm_parent_img_width
 
                 # draw bounding boxex around detected data matrices
-                padding = self.config['LABELS']['bounding_box_padding']
-                bbox_thickness = self.config['LABELS']['bounding_box_thickness']
+                padding = int(self.config['LABELS']['bounding_box_padding'])
+                bbox_thickness = int(self.config['LABELS']['bounding_box_thickness'])
                 cv2.rectangle(
                     output_image,
                     (int(dmtx.bbox[0][0] * scale_factor) + padding, int(dmtx.bbox[0][1] * scale_factor) + padding),

@@ -29,26 +29,29 @@ class Processor:
         image_source = Source(self.config)
 
         # Process images from 'paths'
-        source_1_paths = image_source.from_paths()
-        if source_1_paths: 
-            if not self.dmd:
-                self.__init_dmd()
-            for image_path in source_1_paths: 
-                self.__process_image(image_path, detection_method='datamatrix', dispose=False)
+        if int(self.config['SOURCES']['paths']):
+            source_1_paths = image_source.from_paths()
+            if source_1_paths: 
+                if not self.dmd:
+                    self.__init_dmd()
+                for image_path in source_1_paths: 
+                    self.__process_image(image_path, detection_method='datamatrix', dispose=False)
 
         # Process images from 'input' source
-        source_2_input = image_source.from_input()
-        if source_2_input: 
-            if not self.dmd:
-                self.__init_dmd()
-            for image_path in source_2_input:
-                self.__process_image(image_path, detection_method='datamatrix', dispose=True)
+        if int(self.config['SOURCES']['input_folder']):
+            source_2_input = image_source.from_input()
+            if source_2_input: 
+                if not self.dmd:
+                    self.__init_dmd()
+                for image_path in source_2_input:
+                    self.__process_image(image_path, detection_method='datamatrix', dispose=True)
 
         # Process images from 'output' source
-        source_3_output = image_source.from_output(self.folders)
-        if source_3_output: 
-            for image_path in source_3_output:
-                self.__process_image(image_path, detection_method='path', dispose=True)
+        if int(self.config['SOURCES']['output_folder']):
+            source_3_output = image_source.from_output(self.folders)
+            if source_3_output: 
+                for image_path in source_3_output:
+                    self.__process_image(image_path, detection_method='path', dispose=True)
 
     def __process_image(self, image_path: str, detection_method: str, dispose: bool):
         """
@@ -77,10 +80,10 @@ class Processor:
         image.extract_db_data(self.db)
         image.generate_labels()
         image.place_labels_on_image()
-        image.add_logo()
-        self.folder_structure.save_image_to_output(image)
+        # # image.add_logo()
+        self.folders.save_image_to_output(image)
         if dispose:
-            self.folder_structure.dispose_original(image)
+            self.folders.dispose_original(image)
 
 
             

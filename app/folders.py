@@ -9,7 +9,7 @@ class FolderStructure:
         self.config = config
         self.output_dir = self.config['PATHS']['output_folder']
         self.output_folder_is_exist = os.path.exists(self.output_dir)
-        self.manual_detected_folder = self.config['PATHS']['manual_detected_folder']
+        self.label_required_folder = self.config['PATHS']['label_required_folder_name']
         self.input_folder = self.config['PATHS']['input_folder']
         self.current_structure = {}
         self.unsuccessful_folder = None
@@ -73,16 +73,16 @@ class FolderStructure:
         return path
 
     def save_image_to_output(self, image):
-        for dm in image.data_matrices:
-            if dm.decoded_successful:
+        if image.decoded_uids:
+            for uid in image.decoded_uids:
                 filename, file_extension = os.path.splitext(image.path_to_original)
                 file_name = self.__create_photo_filename(
-                    dm.decoded_info,
+                    uid,
                     image.shooting_date,
                     file_extension
                 )
                 file_path = os.path.join(
-                    self.__get_output_path_by_uid(dm.decoded_info),
+                    self.__get_output_path_by_uid(uid),
                     file_name
                 )
                 cv2.imwrite(file_path, image.output_image)
@@ -116,7 +116,7 @@ class FolderStructure:
             item_folder_path = os.path.join(self.output_dir, folder_name)
             os.makedirs(item_folder_path)
             
-            manual_folder_path = os.path.join(item_folder_path, self.manual_detected_folder)
+            manual_folder_path = os.path.join(item_folder_path, self.label_required_folder)
             os.makedirs(manual_folder_path)
 
     def __create_structure(self):

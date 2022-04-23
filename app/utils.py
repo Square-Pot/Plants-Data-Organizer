@@ -89,7 +89,7 @@ def create_label_text(data: dict, age: str = None, source: bool = False) -> str:
         name += '| Age: %s' % age
 
     if source:
-        if __not_empty(data, 'cultivar'):
+        if __not_empty(data, 'source'):
             source_text = data['source']
             name += '| Seed source: %s' % source_text
 
@@ -195,6 +195,8 @@ def get_text_origin_size(config, image, label_lines: list) -> tuple:
             label_w = label_size[0][0]
     label_h = text_line_heigh * len(label_lines) * interline_factor
 
+    print('label_h', label_h)
+
     # calculate text origin
     text_origin_x = text_origin_x_value
     text_origin_y = h - text_line_heigh
@@ -212,7 +214,7 @@ def draw_label_bgnd(config, image, origin, size):
     bgnd_x1 = int(origin[0] - marker_space)
     bgnd_y1 = int(origin[1] - size[1] - padding)
     bgnd_x2 = int(size[0] + bgnd_x1 + marker_space + padding)
-    bgnd_y2 = int(origin[1] - size[1] + bgnd_y1 + 2 * padding)
+    bgnd_y2 = int(origin[1] +  2 * padding)
 
     # crop the background rect 
     sub_img = image[bgnd_y1:bgnd_y2, bgnd_x1:bgnd_x2]
