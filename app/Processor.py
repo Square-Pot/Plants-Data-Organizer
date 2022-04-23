@@ -1,13 +1,13 @@
-# import os
-# import cv2
 from configparser import ConfigParser
+# import logging
 
 from .db import DB
 from .folders import FolderStructure
 from .sources import Source
 from .classes import TargetImage
 from .dmtx_detector import DataMatrixDetector
-# from .utils import image_resize 
+
+# logging.basicConfig(level=logging.DEBUG)
 
 
 class Processor:
@@ -30,7 +30,9 @@ class Processor:
 
         # Process images from 'paths'
         if int(self.config['SOURCES']['paths']):
+            print('Watching source PATHS...')
             source_1_paths = image_source.from_paths()
+            print(f'{len(source_1_paths)} photos detected')
             if source_1_paths: 
                 if not self.dmd:
                     self.__init_dmd()
@@ -39,7 +41,9 @@ class Processor:
 
         # Process images from 'input' source
         if int(self.config['SOURCES']['input_folder']):
+            print('Watching source INPUT folder...')
             source_2_input = image_source.from_input()
+            print(f'{len(source_2_input)} photos detected')
             if source_2_input: 
                 if not self.dmd:
                     self.__init_dmd()
@@ -48,7 +52,9 @@ class Processor:
 
         # Process images from 'output' source
         if int(self.config['SOURCES']['output_folder']):
+            print('Watching source OUTPUT folder...')
             source_3_output = image_source.from_output(self.folders)
+            print(f'{len(source_3_output)} photos detected')
             if source_3_output: 
                 for image_path in source_3_output:
                     self.__process_image(image_path, detection_method='path', dispose=True)

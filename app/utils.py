@@ -195,8 +195,6 @@ def get_text_origin_size(config, image, label_lines: list) -> tuple:
             label_w = label_size[0][0]
     label_h = text_line_heigh * len(label_lines) * interline_factor
 
-    print('label_h', label_h)
-
     # calculate text origin
     text_origin_x = text_origin_x_value
     text_origin_y = h - text_line_heigh
