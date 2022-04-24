@@ -65,7 +65,7 @@ class FolderStructure:
         return filename_str
 
     def __get_output_path_by_uid(self, uid):
-        self.__update_structure()
+        #  self.__update_structure()   # what for? 
         path = os.path.join(
             self.output_dir,
             self.current_structure[uid],
@@ -75,18 +75,21 @@ class FolderStructure:
     def save_image_to_output(self, image):
         if image.decoded_uids:
             for uid in image.decoded_uids:
-                filename, file_extension = os.path.splitext(image.path_to_original)
-                file_name = self.__create_photo_filename(
-                    uid,
-                    image.shooting_date,
-                    file_extension
-                )
-                file_path = os.path.join(
-                    self.__get_output_path_by_uid(uid),
-                    file_name
-                )
-                cv2.imwrite(file_path, image.output_image)
-                print('Saved image:', file_path)
+                if uid in self.current_structure:
+                    filename, file_extension = os.path.splitext(image.path_to_original)
+                    file_name = self.__create_photo_filename(
+                        uid,
+                        image.shooting_date,
+                        file_extension
+                    )
+                    file_path = os.path.join(
+                        self.__get_output_path_by_uid(uid),
+                        file_name
+                    )
+                    cv2.imwrite(file_path, image.output_image)
+                    print('Saved image:', file_path)
+                else: 
+                    print("Can't save file, unknown UID:", uid)
 
     def __create_successful_dir(self):
         self.successful_folder = os.path.join(self.input_folder, 'successful')
