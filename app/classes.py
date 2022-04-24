@@ -90,7 +90,7 @@ class TargetImage:
                     bad_dmtxs.append(dm)
         # remove unsuccessful detected DataMatrix objects from list 
         for dm in bad_dmtxs:
-            self.data_matrices.pop(dm)
+            self.data_matrices.remove(dm)
 
     def decode_path(self) -> None:
         """ Extracting UID from file path """
