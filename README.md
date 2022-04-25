@@ -30,6 +30,21 @@ Automatically recognizible labels can help to solve both of this tasks. [Data Ma
 
 
 
-## Image sources
+## Data sources
 
-Description on sources will be here
+There are two types of input data: 
+- photos of plants;
+- reference information like genus, species, seeding date, etc.
+
+### Photo sources
+
+In current version you can provide photos of your plants in three ways: 
+1. Put photos to `INPUT` folder in root dir. The app will process them and depending on the result move files to `Successful` or `Unsuccessful` subfolder. 
+2. Add path (or multiple paths) of the location where your photos are stored to the `input_paths.txt` file. The app will process all image files in this locations and in subfolders recursively in *read_only* mode. 
+3. Photos of plants without or undecoded data-matrix label can be manually put to the particular plant's folder `LABEL_REQURED` subfolder. Such photos will be also processed according and marked with label according to the plant folder. 
+
+### Refernce information source
+
+- In current version reference information can be extracted from csv-file. It can be easy created from the list of plants in Excel which you probably have.
+- There are plans to make an possibillity to read info from cloud-stored spreadsheet, like Google Spreadsheet. 
+
