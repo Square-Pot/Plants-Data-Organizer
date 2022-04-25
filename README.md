@@ -15,6 +15,9 @@ Automatic recognition plants on the photos by label with code (Data Matrix), org
 [Creating phisical labels](#creating-phisical-labels) • 
 [FAQ](#creating-phisical-labels)
 
+## Disclaimer
+
+*This is opensource non-commercial project and as well as the dependencies it uses. The author of this project is a succulents grower enthusiast who dreams to automate routine processes of accounting and systematization of plant information making life easier and popularizing hobby of growing plants, especially mesembs (Aizoaceae).*
 
 
 ## Description
@@ -23,10 +26,14 @@ If you are botanist,plants collerctor or grower enthusiast, your mobile phone an
 
 The other laborious task is to keep information about plants. Plastic labels with basic information and excel-file (or barn notebook) are traditional tools. Maintaining of such accounting system requires a lot of work and has high risks of human factor mistakes.
 
+![Traditional labeling](photo_examples/traditional_labeling.jpg)
+
 Automatically recognizible labels can help to solve both of this tasks. [Data Matrix](https://en.wikipedia.org/wiki/Data_Matrix) is like QR-Code, but smaller and containts just a unique number of plant. Label with Data Matrix is easy to DIY - print, cut and laminate for all plants at once. The benefits of such labels: 
 - plant on the photo can be automatically recognized;
 - automatically put information about the plant (name, age, seed source, etc.) in the bottom of the photo;
 - automatically move photo to the folder of particular plant.
+
+![Data Matrix labeling](photo_examples/data-matrix_labeling.jpg)
 
 
 
