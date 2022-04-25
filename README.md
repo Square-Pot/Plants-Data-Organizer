@@ -23,10 +23,13 @@ If you are botanist,plants collerctor or grower enthusiast, your mobile phone an
 
 The other laborious task is to keep information about plants. Plastic labels with basic information and excel-file (or barn notebook) are traditional tools. Maintaining of such accounting system requires a lot of work and has high risks of human factor mistakes.
 
-Automatically recognizible labels can help to solve both of this tasks. [Data Matrix](https://en.wikipedia.org/wiki/Data_Matrix) is like QR-Code, but smaller and containts just a unique number of plant. Label with Data Matrix is easy to DIY - print, cut and laminate for all plants at once. The benefits of such labels: 
-- plant on the photo can be automatically recognized;
-- automatically put information about the plant (name, age, seed source, etc.) in the bottom of the photo;
-- automatically move photo to the folder of particular plant.
+Automatically recognizible labels can help to solve both of this tasks. [Data Matrix](https://en.wikipedia.org/wiki/Data_Matrix) is like QR-Code, but smaller and containts just a unique number of plant. Label with Data Matrix is easy to **DIY** - print, cut and laminate for all plants at once. The benefits of such labels: 
+- recognition automation of plant or multiple plants on the photo;
+- automatically marking of the photos with plant information (name, age, seed source, etc.);
+- automatically plants photos organizing between particular plant folder;
+- neat and organized look because of same label size;
+- identification reliability: it can also contain *human-readable* information as a backup;
+- labels making automation. 
 
 
 
