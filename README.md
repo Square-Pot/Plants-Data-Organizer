@@ -8,16 +8,20 @@
 Automatic recognition plants on the photos by label with code (Data Matrix), organizing and labeling photos by plant. Useful tool for botanists and collectors.
 
 
-[Description](#description) •
-[Image Sources](#image-sources) •
-[Detection Methods](#detection-methods) •
-[Saving and disposing](#saving-disposing) •
-[Creating phisical labels](#creating-phisical-labels) • 
-[FAQ](#creating-phisical-labels)
+- [Intro](#intro) 
+- [Data Sources](#data-sources) 
+  - [Photo sources](#photo-sources)
+  - [Refernce information source](#refernce-information-source)
+    - [CSV-file](#csv-file)
+    - [XLSX-file](#xlsx-file)
+- [Detection Methods](#detection-methods) •
+- [Photo files organizing](#saving-disposing) •
+- [Creating labels](#creating-phisical-labels) • 
+- [FAQ](#creating-phisical-labels)
 
 
 
-## Description
+## Intro
 
 If you are botanist,plants collerctor or grower enthusiast, your mobile phone and computer are almost certainly full of thousands of photos of plants. This is understandable, because you take photos not only in special moments in plants life like flowering, but also just regulary, to track the development of the plant. And all attempts to organize this bunch of photos are usual unsuccessful. 
 
@@ -50,4 +54,17 @@ In current version you can provide photos of your plants in three ways:
 
 - In current version reference information can be extracted from csv-file. It can be easy created from the list of plants in Excel which you probably have.
 - There are plans to make an possibillity to read info from cloud-stored spreadsheet, like Google Spreadsheet. 
+
+#### CSV-file
+
+The main csv-file requirements  are: 
+- correct column names in first line;
+- filled UID column.
+
+There are multiple inconveniences by editing csv-file, for example: during file opening type of UID column should be choosen as 'text', otherwise as 'number' by default the UID values with zero at the first place will loose it, wich means UID will be modified by opening, wich is unacceptable. Considering this csv format is using as temporary.
+
+#### XLSX-file
+
+Local XLSX-file, XMLX-file in the cloud or online spreadsheet (like Goolge Spreadsheet) support will be added as soon as possible.
+
 
