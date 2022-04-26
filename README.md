@@ -2,8 +2,8 @@
 
 # Data Matrix File Sorter and Image Labeler
 
-[![GitHub stars](https://img.shields.io/github/stars/spalk/DataMatrix-Sorter.svg?style=flat-square&label=github%20stars)](https://github.com/yzhang-gh/vscode-markdown)
-[![GitHub Contributors](https://img.shields.io/github/contributors/spalk/DataMatrix-Sorter.svg?style=flat-square)](https://github.com/yzhang-gh/vscode-markdown/graphs/contributors)
+[![GitHub stars](https://img.shields.io/github/stars/spalk/DataMatrix-Sorter.svg?style=flat-square&label=github%20stars)](https://github.com/spalk/DataMatrix-Sorter)
+[![GitHub Contributors](https://img.shields.io/github/contributors/spalk/DataMatrix-Sorter.svg?style=flat-square)](https://github.com/spalk/DataMatrix-Sorter/graphs/contributors)
 
 Automatic recognition plants on the photos by label with code (Data Matrix), organizing and labeling photos by plant. Useful tool for botanists and collectors.
 
