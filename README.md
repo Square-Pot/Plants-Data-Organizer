@@ -16,9 +16,9 @@ Automatic recognition plants on the photos by label with code (Data Matrix), org
   - [Refernce information source](#refernce-information-source)
     - [CSV-file](#csv-file)
     - [XLSX-file](#xlsx-file)
-- [Detection Methods](#detection-methods) •
-- [Photo files organizing](#saving-disposing) •
-- [Creating labels](#creating-phisical-labels) • 
+- [Detection and recognition](#detection-and-recognition)
+- [Photo files organizing](#photo-files-organizing)
+- [Creating labels](#creating-labels)
 - [FAQ](#creating-phisical-labels)
 
 ## Intro
@@ -32,6 +32,8 @@ If you are botanist,plants collerctor or grower enthusiast, your mobile phone an
 
 The other laborious task is to keep information about plants. Plastic labels with basic information and excel-file (or barn notebook) are traditional tools. Maintaining of such accounting system requires a lot of work and has high risks of human factor mistakes.
 
+![Data Matrix labeling](img/labels_comparing.png)
+
 Automatically recognizible labels can help to solve both of this tasks. [Data Matrix](https://en.wikipedia.org/wiki/Data_Matrix) is like QR-Code, but smaller and containts just a unique number of plant. Label with Data Matrix is easy to **DIY** - print, cut and laminate for all plants at once. The benefits of such labels: 
 - recognition automation of plant or multiple plants on the photo;
 - automatically marking of the photos with plant information (name, age, seed source, etc.);
@@ -40,9 +42,7 @@ Automatically recognizible labels can help to solve both of this tasks. [Data Ma
 - identification reliability: it can also contain *human-readable* information as a backup;
 - labels making automation. 
 
-![Data Matrix labeling](photo_examples/labels_comparing.png)
-
-
+![Plantation](img/data-matrix_plantation.jpg)
 
 ## Data sources
 
@@ -75,3 +75,39 @@ There are multiple inconveniences by editing csv-file, for example: during file 
 Local XLSX-file, XMLX-file in the cloud or online spreadsheet (like Goolge Spreadsheet) support will be added as soon as possible.
 
 
+## Detection and recognition
+
+There are three possible cases with detection and recognition:
+1. The photo has Data Matrix wich was detected and plant recignized successfully
+2. The photo has Data Matrix but for some reason it was not detected or recognized or was recognized wrong or recogized correctly, but not found in data base. 
+3. The photo doesn't have any Data Matrix, so recognition is possible. 
+
+Photos from cases 2 and 3, if you can identify plant on it, can be manually places to the required plant folder `LABEL_REQURED` subfolder.  See [Photo Sources](#photo-sources) section.
+
+## Photo files organizing
+The first step after app runnig is create or update output folder structure. The output folder structure is matches the database (reference file) structure exactly and represents inividual folder for each plant. The Name of individula plant folder containts UID and plant name (genus, species, etc.). If you manually delete some plant folder of delete the output folder structure completely, it will be recreated after next app lounch. 
+
+Each plant folder also has a subfolder with name `LABEL_REQURED` for labeling manual recognised plants photos. 
+
+## Creating labels
+A PDF file with labels can be generated according to the reference file. The next steps for creating smart and durable physical labels are: 
+- cut out each paper label; 
+- laminate it using as thicker laminating film as you can get;
+- leave at least 2 mm gap between paper labels (for insulation of paper);
+- cut out each laminated label;
+- make oblique cut of the side of lable wich will be put into the soil. 
+
+![Lable](img/label.png)
+
+PDF-generator is not implemented in this repo yet, but it's ready and it will be here soon. 
+
+## FAQ
+
+### Q: Is it works on Windows / Mac?
+As all code is python, theoretically - yes. But more likely some refactoring is needed for crossplatform support. If you Windows / Mac user, you can contribute as tester.
+
+### Q: What code encoded in Data Matrix? 
+Only UID - a unque identifier - 6 (or more) digits number. All other plant infromation is retrieved from reference file by UID. 
+
+### Q: Where to get a model for a neural network?
+Ask me. It's not a secret, it's just too big to store it in GitHub.
