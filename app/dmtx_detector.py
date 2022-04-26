@@ -78,6 +78,10 @@ class DataMatrixDetector:
                 dm.image = self.__get_cropped_img(bbox)
                 dm.parent_image_shape = self.image.shape
                 self.result.append(dm)
+            return True
+        else:
+            return False
+
 
     def get_result(self) -> list:
         """

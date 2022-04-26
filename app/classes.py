@@ -70,10 +70,16 @@ class TargetImage:
         Detects data matrices on the photo.
         Save result as list of DataMatrix objects.
         """
-        data_matrix_detector.detect(self.image)
-        data_matrices = data_matrix_detector.get_result()
-        if data_matrices:
-            self.data_matrices = data_matrices
+        detection = data_matrix_detector.detect(self.image)
+        if detection:
+            data_matrices = data_matrix_detector.get_result()
+            if data_matrices:
+                self.data_matrices = data_matrices
+            return True
+        else:
+            print('Data matrix was not detected. If should - try to decrease theshold')
+            return False
+
 
     def decode_dm(self) -> None:
         """
