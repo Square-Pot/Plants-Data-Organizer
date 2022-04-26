@@ -24,8 +24,10 @@ class Source:
 
         source_paths = []
         for line in lines:
-            if os.path.isdir(line):
-                source_paths.append(line)
+            # ignore commented lines
+            if not re.match(r'^\s*#', line):
+                if os.path.isdir(line):
+                    source_paths.append(line)
 
         photo_paths = []
         for source_path in source_paths:
@@ -85,7 +87,7 @@ class Source:
         """
         Checks if file is photo by extension in file path
         """
-        if re.match(r'^.+\.(?:jpg|png)$', filename):
+        if re.match(r'^.+\.(?:jpg|png)$', filename, re.IGNORECASE):
             return True
         else:
             # check if it folder

@@ -19,6 +19,9 @@ Automatic recognition plants on the photos by label with code (Data Matrix), org
 - [Creating labels](#creating-phisical-labels) • 
 - [FAQ](#creating-phisical-labels)
 
+## Disclaimer
+
+*This is opensource non-commercial project and as well as the dependencies it uses. The author of this project is a succulents grower enthusiast who dreams to automate routine processes of accounting and systematization of plant information making life easier and popularizing **peaceful** hobby of growing plants, especially mesembs (Aizoaceae).*
 
 
 ## Intro
@@ -34,6 +37,8 @@ Automatically recognizible labels can help to solve both of this tasks. [Data Ma
 - neat and organized look because of same label size;
 - identification reliability: it can also contain *human-readable* information as a backup;
 - labels making automation. 
+
+![Data Matrix labeling](photo_examples/labels_comparing.png)
 
 
 
