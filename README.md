@@ -11,6 +11,8 @@ Automatic recognition plants on the photos by label with code (Data Matrix), org
 
 
 - [Intro](#intro) 
+- [Description](#description)
+- [The logic of the app](#the-logic-of-the-app)
 - [Data Sources](#data-sources) 
   - [Photo sources](#photo-sources)
   - [Reference information source](#reference-information-source)
@@ -32,8 +34,6 @@ If you are a botanist, a plants collector or a grower enthusiast, your mobile ph
 
 The other laborious task is to keep information about plants. Plastic labels with basic information and excel-file (or barn notebook) are traditional tools. Maintaining of such accounting system requires a lot of work and has high risks of human factor mistakes.
 
-![Data Matrix labeling](img/labels_comparing.png)
-
 Automatically recognizible labels can help to solve both of this tasks. [Data Matrix](https://en.wikipedia.org/wiki/Data_Matrix) is like a QR-Code, but smaller and containts just a unique number of plant. Label with Data Matrix is easy to **DIY** - print, cut and laminate for all plants at once. The benefits of such labels: 
 - recognition automation of plant or multiple plants on the photo;
 - automatically marking of the photos with plant information (name, age, seed source, etc.);
@@ -42,7 +42,25 @@ Automatically recognizible labels can help to solve both of this tasks. [Data Ma
 - identification reliability: it can also contain *human-readable* information as a backup;
 - labels making automation. 
 
+![Data Matrix labeling](img/labels_comparing.png)
+
 ![Plantation](img/data-matrix_plantation.jpg)
+
+## The logic of the app
+
+The following steps are proposed: 
+
+1. The plant lover take photos of plants he/she owning as mach as he/she wants. 
+2. The app analyse all this photos and try to find a data matrix and recoqnize the plant.
+3. The name, age, etc. of plant is put on photo.
+4. The resulting photo is saving to the individual folder of particular plant.
+
+![4 steps](img/4_steps.png)
+
+After some time new photos will be collected and the cycle can be repeted. As a result the plant lover will have all his photos of his/her plants organized in fully automatically way with information label on each photo. 
+
+More detailed algorithm is shown on the [logic scheme](img/logic_scheme.png).
+
 
 ## Data sources
 
@@ -100,6 +118,7 @@ A PDF file with labels can be generated according to the reference file. The nex
 ![Lable](img/label.png)
 
 PDF-generator is not implemented in this repo yet, but it's ready and it will be here soon. 
+
 
 ## FAQ
 
