@@ -1,5 +1,7 @@
 
 
+EN | [RU](readme_ru.md)
+
 # Data Matrix File Sorter and Image Labeler
 
 [![GitHub stars](https://img.shields.io/github/stars/spalk/DataMatrix-Sorter.svg?style=flat-square&label=github%20stars)](https://github.com/spalk/DataMatrix-Sorter)
@@ -19,12 +21,12 @@ Automatic recognition plants on the photos by label with code (Data Matrix), org
 - [Creating labels](#creating-phisical-labels) • 
 - [FAQ](#creating-phisical-labels)
 
-## Disclaimer
+## Intro
 
 *This is opensource non-commercial project and as well as the dependencies it uses. The author of this project is a succulents grower enthusiast who dreams to automate routine processes of accounting and systematization of plant information making life easier and popularizing **peaceful** hobby of growing plants, especially mesembs (Aizoaceae).*
 
 
-## Intro
+## Description
 
 If you are botanist,plants collerctor or grower enthusiast, your mobile phone and computer are almost certainly full of thousands of photos of plants. This is understandable, because you take photos not only in special moments in plants life like flowering, but also just regulary, to track the development of the plant. And all attempts to organize this bunch of photos are usual unsuccessful. 
 
