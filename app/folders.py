@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import cv2
@@ -87,9 +88,9 @@ class FolderStructure:
                         file_name
                     )
                     cv2.imwrite(file_path, image.output_image)
-                    print('Saved image:', file_path)
+                    logging.info('Saved image: %s', file_path)
                 else: 
-                    print("Can't save file, unknown UID:", uid)
+                    logging.warning("Can't save file, unknown UID:", uid)
 
     def __create_successful_dir(self):
         self.successful_folder = os.path.join(self.input_folder, 'successful')
@@ -143,9 +144,9 @@ class FolderStructure:
                     uid = uid_search.group(1)
                     self.current_structure[uid] = folder
                 else:
-                    print('Foreign directory in output folder:', folder)
+                    logging.warning('Foreign directory in output folder: %s', folder)
             else:
-                print('Foreign object in output folder:', folder)
+                logging.warning('Foreign object in output folder: %s', folder)
 
     def __update_structure(self):
         self.__get_current_structure()
@@ -161,11 +162,11 @@ class FolderStructure:
                         os.path.join(self.output_dir, folder_name_current),
                         os.path.join(self.output_dir, folder_name_should_be)
                     )
-                    print(uid, 'Name of folder was changed')
+                    logging.info('Name of folder was changed for UID: %s', uid)
             else:
                 if re.match(r'\d+', uid):
                     self.__create_item_folder(db_data[uid])
-                    print(uid, 'Folder for UID was not found. Now created')
+                    logging.info('Folder for UID: %s was not found. Now created', uid)
 
 
 def main():

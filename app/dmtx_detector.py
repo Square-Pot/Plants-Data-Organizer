@@ -1,5 +1,6 @@
 import cv2
 import numpy
+import logging
 
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
@@ -70,6 +71,7 @@ class DataMatrixDetector:
         self.image = image
         self.outputs = self.predictor(image)
         bboxes = self.__get_bboxes()
+        logging.debug('%s data matrices was detected', len(bboxes))
         if bboxes:
             self.result = []
             for bbox in bboxes:

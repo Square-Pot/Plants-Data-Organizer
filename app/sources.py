@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 class Source:
     """
@@ -19,7 +20,7 @@ class Source:
             with open(paths_file_path, 'r') as f:
                 lines = f.readlines()
         else: 
-            print('Paths-file is not found')
+            logging.warning('Paths-file is not found: %s', paths_file_path)
             return []
 
         source_paths = []
@@ -46,8 +47,9 @@ class Source:
         input_folder = self.config['PATHS']['input_folder']
 
         if not os.path.exists(input_folder):
-            print('Input folder does not exist')
+            logging.info('Input folder does not exist: %s', input_folder)
             os.mkdir(input_folder)
+            logging.info('Input folder was created')
             return
         
         input_content = os.listdir(input_folder)
@@ -94,7 +96,7 @@ class Source:
             input_folder = self.config['PATHS']['input_folder']
             file_path = os.path.join(input_folder, filename)
             if not os.path.isdir(file_path):
-                print('Looks like non image file is in input folder:', filename)
+                logging.debug('Non image file is in source folder:', filename)
             return False
 
 
