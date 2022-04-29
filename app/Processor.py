@@ -77,9 +77,8 @@ class Processor:
 
         if detection_method == 'datamatrix':
             dm_detected = image.detect_dm(self.dmd)
-            if not dm_detected:
-                self.folders.move_to_unsuccessful(image.path_to_original)
-                return
+            if not dm_detected and dispose:
+                self.folders.dispose_original(image)
             image.decode_dm()
 
         if detection_method == 'path':
