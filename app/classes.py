@@ -202,3 +202,33 @@ class TargetImage:
             # put label text on image
             output_image = put_text_on_image(self.config, output_image, self.label_text, text_origin)
             self.output_image = output_image
+
+
+    def add_logo(self):
+        add_watermark = int(self.config['LABELS']['add_watermark'])
+
+        if add_watermark:
+            image = self.output_image
+            logo = cv2.imread("img/watermark.png")
+            
+            # calculating dimensions
+            # height and width of the logo
+            h_logo, w_logo, _ = logo.shape
+            
+            # height and width of the image
+            h_img, w_img, _ = image.shape
+            
+            # calculating from top, bottom, right and left
+            top_y = h_img - h_img/5 - h_logo    # vertical position: 20% from bottom
+            left_x = w_img - w_logo             # horizontal position: to the right
+            bottom_y = top_y + h_logo
+            right_x = left_x + w_logo
+            
+            # adding watermark to the image
+            destination = image[top_y:bottom_y, left_x:right_x]
+            result = cv2.addWeighted(destination, 1, logo, 0.5, 0)
+            
+            # displaying and saving image
+            image[top_y:bottom_y, left_x:right_x] = result
+
+            self.output_image = image

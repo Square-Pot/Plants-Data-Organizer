@@ -89,7 +89,7 @@ class Processor:
         image.extract_db_data(self.db)
         image.generate_labels()
         image.place_labels_on_image()
-        # # image.add_logo()
+        image.add_logo()
         self.folders.save_image_to_output(image)
         if dispose:
             self.folders.dispose_original(image)
