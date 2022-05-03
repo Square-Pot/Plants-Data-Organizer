@@ -110,18 +110,18 @@ Each plant folder also has a subfolder with name `LABEL_REQURED` for labeling ma
 
 ## Result examples
 
-- Resulting photo of manually recognized plant:
+- Resulting photo of manually recognized plant:  
 
-[![name](https://i.imgur.com/eKc0SbYt.jpg)](https://imgur.com/eKc0SbY) 
+ [![name](https://i.imgur.com/eKc0SbYt.jpg)](https://imgur.com/eKc0SbY)   
 
 
-- Resulting photo of two autmatically recognized plants:
+- Resulting photo of two autmatically recognized plants:  
 
-[![name](https://i.imgur.com/lKOVYqLt.jpg)](https://imgur.com/lKOVYqL) 
+ [![name](https://i.imgur.com/lKOVYqLt.jpg)](https://imgur.com/lKOVYqL)   
 
-- Resulting photo of multiple autmatically recognized plants:
+- Resulting photo of multiple autmatically recognized plants:  
 
-[![name](https://i.imgur.com/JVWe48Tt.jpg)](https://imgur.com/JVWe48T) 
+ [![name](https://i.imgur.com/JVWe48Tt.jpg)](https://imgur.com/JVWe48T)   
 
 
 ## Creating labels
