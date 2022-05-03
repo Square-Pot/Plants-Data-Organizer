@@ -12,6 +12,10 @@ from detectron2.data import MetadataCatalog, DatasetCatalog
 
 from .classes import DataMatrix
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+
 
 class DataMatrixDetector:
     """
@@ -71,7 +75,7 @@ class DataMatrixDetector:
         self.image = image
         self.outputs = self.predictor(image)
         bboxes = self.__get_bboxes()
-        logging.debug('%s data matrices was detected', len(bboxes))
+        logger.debug('%s data matrices was detected', len(bboxes))
         if bboxes:
             self.result = []
             for bbox in bboxes:

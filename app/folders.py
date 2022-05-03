@@ -4,6 +4,11 @@ import re
 import cv2
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+
+
 class FolderStructure:
 
     def __init__(self, config):
@@ -88,9 +93,9 @@ class FolderStructure:
                         file_name
                     )
                     cv2.imwrite(file_path, image.output_image)
-                    logging.info('Saved image: %s', file_path)
+                    logger.info('Saved image: %s', file_path)
                 else: 
-                    logging.warning("Can't save file, unknown UID:", uid)
+                    logger.warning("Can't save file, unknown UID:", uid)
 
     def __create_successful_dir(self):
         self.successful_folder = os.path.join(self.input_folder, 'successful')
@@ -144,9 +149,9 @@ class FolderStructure:
                     uid = uid_search.group(1)
                     self.current_structure[uid] = folder
                 else:
-                    logging.warning('Foreign directory in output folder: %s', folder)
+                    logger.warning('Foreign directory in output folder: %s', folder)
             else:
-                logging.warning('Foreign object in output folder: %s', folder)
+                logger.warning('Foreign object in output folder: %s', folder)
 
     def __update_structure(self):
         self.__get_current_structure()
@@ -162,11 +167,11 @@ class FolderStructure:
                         os.path.join(self.output_dir, folder_name_current),
                         os.path.join(self.output_dir, folder_name_should_be)
                     )
-                    logging.info('Name of folder was changed for UID: %s', uid)
+                    logger.info('Name of folder was changed for UID: %s', uid)
             else:
                 if re.match(r'\d+', uid):
                     self.__create_item_folder(db_data[uid])
-                    logging.info('Folder for UID: %s was not found. Now created', uid)
+                    logger.info('Folder for UID: %s was not found. Now created', uid)
 
 
 def main():

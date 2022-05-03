@@ -2,6 +2,11 @@ import os
 import re
 import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+
+
 class Source:
     """
     |   Class for reading input fotos
@@ -20,7 +25,7 @@ class Source:
             with open(paths_file_path, 'r') as f:
                 lines = f.readlines()
         else: 
-            logging.warning('Paths-file is not found: %s', paths_file_path)
+            logger.warning('Paths-file is not found: %s', paths_file_path)
             return []
 
         source_paths = []
@@ -47,9 +52,9 @@ class Source:
         input_folder = self.config['PATHS']['input_folder']
 
         if not os.path.exists(input_folder):
-            logging.info('Input folder does not exist: %s', input_folder)
+            logger.info('Input folder does not exist: %s', input_folder)
             os.mkdir(input_folder)
-            logging.info('Input folder was created')
+            logger.info('Input folder was created')
             return
         
         input_content = os.listdir(input_folder)
@@ -96,7 +101,7 @@ class Source:
             input_folder = self.config['PATHS']['input_folder']
             file_path = os.path.join(input_folder, filename)
             if not os.path.isdir(file_path):
-                logging.debug('Non image file is in source folder:', filename)
+                logger.debug('Non image file is in source folder: %s', filename)
             return False
 
 

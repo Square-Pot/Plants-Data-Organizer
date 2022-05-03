@@ -2,6 +2,7 @@
 import cv2
 import random
 import re
+import logging
 
 from .utils import get_valid_colors, image_resize
 from .utils import decode_data_matrix
@@ -13,6 +14,10 @@ from .utils import get_text_origin_size
 from .utils import draw_label_bgnd
 from .utils import get_valid_colors
 from .utils import put_text_on_image
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 
 
 class DataMatrix:
