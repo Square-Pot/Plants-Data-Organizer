@@ -138,20 +138,24 @@ class FolderStructure:
             self.__create_item_folder(db_data[uid])
 
     def __get_current_structure(self):
-        # get current folder structure
+        """ Get current folder structure """
         pattern = r"^(\d+)_.+$"
-        output_dir_ls = os.listdir(self.output_dir)
-        for folder in output_dir_ls:
-            folder_path = os.path.join(self.output_dir, folder)
-            if os.path.exists(folder_path):
-                uid_search = re.search(pattern, folder)
-                if uid_search:
-                    uid = uid_search.group(1)
-                    self.current_structure[uid] = folder
+        if os.path.exists(self.output_dir):
+            output_dir_ls = os.listdir(self.output_dir)
+            for folder in output_dir_ls:
+                folder_path = os.path.join(self.output_dir, folder)
+                if os.path.exists(folder_path):
+                    uid_search = re.search(pattern, folder)
+                    if uid_search:
+                        uid = uid_search.group(1)
+                        self.current_structure[uid] = folder
+                    else:
+                        logger.warning('Foreign directory in output folder: %s', folder)
                 else:
-                    logger.warning('Foreign directory in output folder: %s', folder)
-            else:
-                logger.warning('Foreign object in output folder: %s', folder)
+                    logger.warning('Foreign object in output folder: %s', folder)
+        else:
+            logger.warning('No output folder structure was found')
+            return None
 
     def __update_structure(self):
         self.__get_current_structure()

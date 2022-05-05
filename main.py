@@ -1,7 +1,10 @@
 import logging
 import logging.config
 from configparser import ConfigParser
-from app.Processor import Processor
+#from app.Processor import Processor
+from app.folders import FolderStructure
+from app.processor import Processor
+from app.gui import Gui
 
 
 def main():
@@ -14,8 +17,14 @@ def main():
     
     config = ConfigParser()
     config.read('settings.ini')
+
+    folders = FolderStructure(config)
+
     processor = Processor(config)
-    processor.exec()
+
+    gui = Gui(config, folders, processor)
+    gui.get_block_input_img()
+    gui.mainloop()
 
     logger.info(f"{'='*30} FINISHED {'='*30}")
 
