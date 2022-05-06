@@ -24,6 +24,7 @@ def main():
 
     gui = Gui(config, folders, processor)
     gui.get_block_input_img()
+    gui.get_block_input_reference()
     gui.mainloop()
 
     logger.info(f"{'='*30} FINISHED {'='*30}")
