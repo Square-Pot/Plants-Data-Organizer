@@ -6,6 +6,7 @@ import logging
 from .folders import FolderStructure
 from .sources import Source
 from .processor import Processor
+from .db import DB
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -14,11 +15,12 @@ logger.addHandler(logging.StreamHandler())
 
 class Gui:
 
-    def __init__(self, config: ConfigParser, folders: FolderStructure, processor: Processor) -> None:
+    def __init__(self, config: ConfigParser, db:DB, folders: FolderStructure, processor: Processor) -> None:
         self.config = config
         self.folders = folders
         self.processor = processor
         self.source = Source(self.config)
+        self.db = db
 
         self.root = tk.Tk() 
         self.root.title("Data Matrix Sorter and Labeler")
@@ -106,8 +108,10 @@ class Gui:
     def __fill_frame_scroll_one(self, frame):
         myscroll = tk.Scrollbar(frame) 
         mylist = tk.Listbox(frame, yscrollcommand = myscroll.set )  
-        for line in range(1, 100): 
-            mylist.insert(tk.END, "Number " + str(line)) 
+        genus_list = self.db.get_genus_list()
+
+        for genus in genus_list: 
+            mylist.insert(tk.END, genus) 
         mylist.pack(side = tk.LEFT, fill = tk.BOTH )    
         myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
 
@@ -140,7 +144,3 @@ class Gui:
         # TODO next line is definitely not cross platform
         os.system('gedit %s' % paths_file_path)
 
-
-
-if __name__ == '__main__':
-    main()

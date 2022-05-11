@@ -60,7 +60,14 @@ class DB:
         else:
             return False
 
-
+    def get_genus_list(self):
+        genus_list = []
+        for i in self.data: 
+            genus = self.data[i]['genus']
+            if genus not in genus_list:
+                genus_list.append(genus)
+        genus_list.sort()
+        return genus_list
 
 
 def main():
