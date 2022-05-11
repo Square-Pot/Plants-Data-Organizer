@@ -23,8 +23,8 @@ def main():
     processor = Processor(config)
 
     gui = Gui(config, folders, processor)
-    gui.get_block_input_img(0,0)
-    gui.get_block_input_reference(0,0)
+    # gui.get_block_input_img(0,0)
+    # gui.get_block_input_reference(0,0)
     # gui.maingrid()
     gui.mainloop()
 

@@ -19,20 +19,47 @@ class Gui:
         self.folders = folders
         self.processor = processor
         self.source = Source(self.config)
+
         self.root = tk.Tk() 
         self.root.title("Data Matrix Sorter and Labeler")
         self.root.geometry("1000x600") 
-        self.main_frame = tk.Frame(self.root)
 
         self.checkbox_input_var = tk.IntVar()
         self.checkbox_paths_var = tk.IntVar()
         self.checkbox_output_var = tk.IntVar()
 
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_columnconfigure(2, weight=1)
 
-    def get_block_input_img(self, col, row):
-        input_frame = tk.LabelFrame(self.main_frame, text='Input photos')
-        # input_frame.pack(side=tk.LEFT)
-        
+        frame_top_left = tk.Frame(self.root, bg='cyan', width=250, height=150, pady=3)
+        frame_top_center = tk.Frame(self.root, bg='white', width=250, height=150, pady=3)
+        frame_top_right = tk.Frame(self.root, bg='cyan', width=500, height=150, pady=3)
+        frame_bottom_left = tk.Frame(self.root, bg='lavender', width=250, height=450, pady=3)
+        frame_bottom_center = tk.Frame(self.root, bg='gray', width=250, height=450, pady=3)
+        frame_bottom_right = tk.Frame(self.root, bg='lavender', width=500, height=450, pady=3)
+
+        frame_top_left.grid(row=0, column=0, sticky='ew')
+        frame_top_center.grid(row=0, column=1, sticky='ew')
+        frame_top_right.grid(row=0, column=2,  sticky='ew')
+        frame_bottom_left.grid(row=1, column=0, sticky='ns')
+        frame_bottom_center.grid(row=1, column=1, sticky='ns')
+        frame_bottom_right.grid(row=1, column=2, sticky='nsew')
+
+        self.__fill_frame_input(frame_top_left)
+        self.__fill_frame_db(frame_top_center)
+        self.__fill_frame_scroll_one(frame_bottom_left)
+        self.__fill_frame_scroll_two(frame_bottom_center)
+
+
+    def mainloop(self):
+        self.root.mainloop() 
+
+    def __fill_frame_input(self, frame):
+        input_frame = tk.LabelFrame(frame, text='Input photos')
+            
         checkbox_input = tk.Checkbutton(input_frame, text=f'Input folder [{ self.source.count_input() }]', variable=self.checkbox_input_var)
         if int(self.config['SOURCES']['input_folder']):
             checkbox_input.select()
@@ -55,19 +82,17 @@ class Gui:
         )
         button_frame.pack(fill=tk.Y)
 
-
         button_edit_paths = tk.Button(button_frame, text="Edit Paths", command=self.handle_click_edit_paths)
         button_edit_paths.grid(column=0, row=0, padx=5, pady=5)
 
         button_input_output = tk.Button(button_frame, text="Proceed", command=self.handle_click_input_proceed)
         button_input_output.grid(column=1, row=0, padx=5, pady=5)
 
-        input_frame.grid(column=0, row=0)
+        input_frame.pack(side=tk.LEFT)
 
-
-    def get_block_input_reference(self, col, row):
-        input_frame = tk.LabelFrame(self.main_frame, text='Input reference file')
-        #input_frame.pack(side=tk.LEFT,  padx=5)
+    def __fill_frame_db(self, frame):
+        input_frame = tk.LabelFrame(frame, text='Input reference file')
+        input_frame.pack(side=tk.LEFT,  padx=5)
 
         label_reference = tk.Label(input_frame, text='245 lines, UID for 12 is needed')
         label_reference.pack()
@@ -78,31 +103,21 @@ class Gui:
         button_generate_uids = tk.Button(input_frame, text="Generate UIDs")
         button_generate_uids.pack()
 
-        input_frame.grid(column=1, row=0)
-
-
-    def get_bloc_scroll_one(self):
-        myscroll = tk.Scrollbar(self.root) 
-        myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
-        
-        mylist = tk.Listbox(self.root, yscrollcommand = myscroll.set )  
+    def __fill_frame_scroll_one(self, frame):
+        myscroll = tk.Scrollbar(frame) 
+        mylist = tk.Listbox(frame, yscrollcommand = myscroll.set )  
         for line in range(1, 100): 
             mylist.insert(tk.END, "Number " + str(line)) 
         mylist.pack(side = tk.LEFT, fill = tk.BOTH )    
-        
-        myscroll.config(command = mylist.yview) 
+        myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
 
-
-    def maingrid(self):
-        
-        self.get_block_input_img(col=0, row=0)
-        self.get_block_input_reference(col=1, row=0)
-
-    
-
-    def mainloop(self):
-        self.root.mainloop() 
-
+    def __fill_frame_scroll_two(self, frame):
+        myscroll = tk.Scrollbar(frame) 
+        mylist = tk.Listbox(frame, yscrollcommand = myscroll.set )  
+        for line in range(1, 100): 
+            mylist.insert(tk.END, "Number " + str(line)) 
+        mylist.pack(side = tk.LEFT, fill = tk.BOTH )    
+        myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
 
     def handle_click_input_proceed(self):
         if self.checkbox_input_var.get():
