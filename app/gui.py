@@ -53,8 +53,7 @@ class Gui:
         self.__fill_frame_input(frame_top_left)
         self.__fill_frame_db(frame_top_center)
         self.__fill_frame_scroll_one(frame_bottom_left)
-        self.__fill_frame_scroll_two(frame_bottom_center)
-
+        self.frame_bottom_center = frame_bottom_center
 
     def mainloop(self):
         self.root.mainloop() 
@@ -106,22 +105,28 @@ class Gui:
         button_generate_uids.pack()
 
     def __fill_frame_scroll_one(self, frame):
-        myscroll = tk.Scrollbar(frame) 
-        mylist = tk.Listbox(frame, yscrollcommand = myscroll.set )  
+        genus_scrollbar = tk.Scrollbar(frame) 
+        genus_listbox = tk.Listbox(frame, yscrollcommand = genus_scrollbar.set )  
         genus_list = self.db.get_genus_list()
-
         for genus in genus_list: 
-            mylist.insert(tk.END, genus) 
-        mylist.pack(side = tk.LEFT, fill = tk.BOTH )    
-        myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
+            genus_listbox.insert(tk.END, genus) 
+        genus_listbox.pack(side = tk.LEFT, fill = tk.BOTH )   
+        genus_listbox.bind("<<ListboxSelect>>", self.handle_select_genus) 
+        genus_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
 
-    def __fill_frame_scroll_two(self, frame):
-        myscroll = tk.Scrollbar(frame) 
-        mylist = tk.Listbox(frame, yscrollcommand = myscroll.set )  
-        for line in range(1, 100): 
-            mylist.insert(tk.END, "Number " + str(line)) 
-        mylist.pack(side = tk.LEFT, fill = tk.BOTH )    
-        myscroll.pack(side = tk.RIGHT, fill = tk.Y) 
+    def __fill_frame_scroll_two(self, frame, genus):
+        species_scrollbar = tk.Scrollbar(frame) 
+        species_listbox = tk.Listbox(frame, yscrollcommand = species_scrollbar.set )  
+        species_list = self.db.get_species_list(genus)
+        for species in species_list: 
+            species_listbox.insert(tk.END, species) 
+        species_listbox.pack(side = tk.LEFT, fill = tk.BOTH )    
+        species_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
+
+    @staticmethod
+    def __clear_frame(frame):
+        for widgets in frame.winfo_children():
+            widgets.destroy()
 
     def handle_click_input_proceed(self):
         if self.checkbox_input_var.get():
@@ -143,4 +148,12 @@ class Gui:
         )
         # TODO next line is definitely not cross platform
         os.system('gedit %s' % paths_file_path)
+
+    def handle_select_genus(self, event):
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            genus = event.widget.get(index)
+            self.__clear_frame(self.frame_bottom_center)
+            self.__fill_frame_scroll_two(self.frame_bottom_center, genus)
 

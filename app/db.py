@@ -69,6 +69,20 @@ class DB:
         genus_list.sort()
         return genus_list
 
+    def get_species_list(self, genus):
+        species_list = []
+        fields = ['species', 'subspecies', 'variety', 'cultivar', 'synonym', 'number']
+        for i in self.data: 
+            if self.data[i]['genus'] == genus:
+                species_name_list = []
+                for f in fields: 
+                    if f in self.data[i]:
+                        species_name_list.append(self.data[i][f])
+                species_name_str = ' '.join(species_name_list)
+                species_list.append(species_name_str)
+        species_list.sort()
+        return species_list
+
 
 def main():
     db = DB('../plants_export.txt')
