@@ -1,4 +1,3 @@
-import imp
 import logging
 import logging.config
 from configparser import ConfigParser

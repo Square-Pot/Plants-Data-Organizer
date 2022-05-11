@@ -106,7 +106,7 @@ class Gui:
 
     def __fill_frame_scroll_one(self, frame):
         genus_scrollbar = tk.Scrollbar(frame) 
-        genus_listbox = tk.Listbox(frame, yscrollcommand = genus_scrollbar.set )  
+        genus_listbox = tk.Listbox(frame, yscrollcommand = genus_scrollbar.set, width=25)  
         genus_list = self.db.get_genus_list()
         for genus in genus_list: 
             genus_listbox.insert(tk.END, genus) 
@@ -116,7 +116,7 @@ class Gui:
 
     def __fill_frame_scroll_two(self, frame, genus):
         species_scrollbar = tk.Scrollbar(frame) 
-        species_listbox = tk.Listbox(frame, yscrollcommand = species_scrollbar.set )  
+        species_listbox = tk.Listbox(frame, yscrollcommand = species_scrollbar.set, width=25 )  
         species_list = self.db.get_species_list(genus)
         for species in species_list: 
             species_listbox.insert(tk.END, species) 
