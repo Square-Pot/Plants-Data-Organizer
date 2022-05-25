@@ -1,7 +1,9 @@
 import os
-import tkinter as tk
+import sys
+import subprocess
 from configparser import ConfigParser
 import logging
+import tkinter as tk
 from PIL import Image, ImageTk
 
 from .folders import FolderStructure
@@ -142,6 +144,7 @@ class Gui:
             label = tk.Label(frame, image = photo)
             label.image = photo
             label.grid(row=1, column = i)
+            label.bind("<Button-1>",lambda e,path=path:self.__open_img_in_default_viewer(path))
             i += 1
 
 
@@ -189,4 +192,12 @@ class Gui:
 
             self.__clear_frame(self.frame_bottom_right)
             self.__show_images(self.frame_bottom_right, img_paths)
+
+    @staticmethod
+    def __open_img_in_default_viewer(path):
+        """ Opens image in external image viewer """
+        imageViewerFromCommandLine = {'linux':'xdg-open',
+                                    'win32':'explorer',
+                                    'darwin':'open'}[sys.platform]
+        subprocess.run([imageViewerFromCommandLine, path])
 
