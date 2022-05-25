@@ -70,7 +70,12 @@ class DB:
         return genus_list
 
     def get_species_list(self, genus):
-        species_list = []
+        """ 
+        Returns species for particual genus
+        (actially not only species but also ssp, var, field_num, etc.)
+        as list of dictionaries:  UID:string_line
+        """
+        species_list = {}
         fields = ['species', 'subspecies', 'variety', 'cultivar', 'synonym', 'number']
         for i in self.data: 
             if self.data[i]['genus'] == genus:
@@ -79,8 +84,9 @@ class DB:
                     if f in self.data[i]:
                         species_name_list.append(self.data[i][f])
                 species_name_str = ' '.join(species_name_list)
-                species_list.append(species_name_str)
-        species_list.sort()
+                species_list[self.data[i]['UID']] = species_name_str
+                
+        #species_list.sort()
         return species_list
 
 

@@ -32,7 +32,10 @@ class FolderStructure:
         else:
             self.__create_structure()
 
-    def get_current_structure(self):
+    def get_current_structure(self) -> dict:
+        """
+        Returns folder structure in OUTPUT folder as dict:  {uid:folder_name}
+        """
         self.__get_current_structure()
         return self.current_structure
 
@@ -57,6 +60,27 @@ class FolderStructure:
                     os.path.basename(image.path_to_original)
                 )
             )
+
+    def get_img_paths(self, uid):
+        """ Return list of image file paths in plant folder by UID """
+        img_paths = []
+        plant_path = os.path.join(
+            self.output_dir,
+            self.get_current_structure()[uid]
+        )
+        for filename in os.listdir(plant_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                img_paths.append(
+                    os.path.join(
+                        #os.getcwd(),
+                        plant_path,
+                        filename
+                    )
+                )
+        return img_paths
+
+        
+        
             
 
     @staticmethod

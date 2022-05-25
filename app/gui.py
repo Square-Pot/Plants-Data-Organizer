@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from configparser import ConfigParser
 import logging
+from PIL import Image, ImageTk
 
 from .folders import FolderStructure
 from .sources import Source
@@ -30,7 +31,7 @@ class Gui:
         self.checkbox_paths_var = tk.IntVar()
         self.checkbox_output_var = tk.IntVar()
 
-        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_rowconfigure(0, weight=1, minsize=150)
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
@@ -54,6 +55,9 @@ class Gui:
         self.__fill_frame_db(frame_top_center)
         self.__fill_frame_scroll_one(frame_bottom_left)
         self.frame_bottom_center = frame_bottom_center
+        self.frame_bottom_right = frame_bottom_right
+
+        self.uid_species_reference = None
 
     def mainloop(self):
         self.root.mainloop() 
@@ -118,10 +122,28 @@ class Gui:
         species_scrollbar = tk.Scrollbar(frame) 
         species_listbox = tk.Listbox(frame, yscrollcommand = species_scrollbar.set, width=25 )  
         species_list = self.db.get_species_list(genus)
-        for species in species_list: 
-            species_listbox.insert(tk.END, species) 
+        self.uid_species_reference = []
+        for uid in species_list: 
+            self.uid_species_reference.append(uid)
+            species_listbox.insert(tk.END, species_list[uid]) 
         species_listbox.pack(side = tk.LEFT, fill = tk.BOTH )    
+        species_listbox.bind("<<ListboxSelect>>", self.handle_select_plant) 
         species_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
+
+    def __show_images(self, frame, img_file_list):
+        print('__file__ path', os.path.realpath(__file__))
+        print('CWD path', os.getcwd())
+
+        for i, path in enumerate(img_file_list):
+            image = Image.open(path)
+            image = image.resize((100,100))
+            photo = ImageTk.PhotoImage(image)
+
+            label = tk.Label(frame, image = photo)
+            label.image = photo
+            label.grid(row=1, column = i)
+            i += 1
+
 
     @staticmethod
     def __clear_frame(frame):
@@ -156,4 +178,15 @@ class Gui:
             genus = event.widget.get(index)
             self.__clear_frame(self.frame_bottom_center)
             self.__fill_frame_scroll_two(self.frame_bottom_center, genus)
+
+
+    def handle_select_plant(self, event):
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            uid = self.uid_species_reference[index]
+            img_paths = self.folders.get_img_paths(uid)
+
+            self.__clear_frame(self.frame_bottom_right)
+            self.__show_images(self.frame_bottom_right, img_paths)
 
