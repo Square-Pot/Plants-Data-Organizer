@@ -33,29 +33,37 @@ class Gui:
         self.checkbox_paths_var = tk.IntVar()
         self.checkbox_output_var = tk.IntVar()
 
-        self.root.grid_rowconfigure(0, weight=1, minsize=150)
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
-        self.root.grid_columnconfigure(2, weight=1)
+        top_row_height = 150
+        bottom_row_hight = 450
+        left_col_width = 300
+        center_col_width = 300
+        rigth_col_width = 500
+        padding = 3
 
-        frame_top_left = tk.Frame(self.root, bg='cyan', width=250, height=150, pady=3)
-        frame_top_center = tk.Frame(self.root, bg='white', width=250, height=150, pady=3)
-        frame_top_right = tk.Frame(self.root, bg='cyan', width=500, height=150, pady=3)
-        frame_bottom_left = tk.Frame(self.root, bg='lavender', width=250, height=450, pady=3)
-        frame_bottom_center = tk.Frame(self.root, bg='gray', width=250, height=450, pady=3)
-        frame_bottom_right = tk.Frame(self.root, bg='lavender', width=500, height=450, pady=3)
+        self.root.grid_rowconfigure(0, minsize=150)
+        self.root.grid_rowconfigure(1, weight=1, minsize=150)
+        self.root.grid_columnconfigure(0, minsize=200)
+        self.root.grid_columnconfigure(1, minsize=200)
+        self.root.grid_columnconfigure(2, weight=1, minsize=500)
 
-        frame_top_left.grid(row=0, column=0, sticky='ew')
-        frame_top_center.grid(row=0, column=1, sticky='ew')
-        frame_top_right.grid(row=0, column=2,  sticky='ew')
+        frame_top_left = tk.Frame(self.root, width=left_col_width, height=top_row_height, pady=padding, padx=padding)
+        frame_top_center = tk.Frame(self.root, width=center_col_width, height=top_row_height, pady=padding, padx=padding)
+        frame_top_right = tk.Frame(self.root, width=rigth_col_width, height=top_row_height, pady=padding, padx=padding)
+        frame_bottom_left = tk.Frame(self.root, width=left_col_width, height=bottom_row_hight, pady=padding, padx=padding)
+        frame_bottom_center = tk.Frame(self.root, width=center_col_width, height=bottom_row_hight, pady=padding, padx=padding)
+        frame_bottom_right = tk.Frame(self.root, width=rigth_col_width, height=bottom_row_hight, pady=padding, padx=padding)
+
+        frame_top_left.grid(row=0, column=0, sticky='nesw')
+        frame_top_center.grid(row=0, column=1, sticky='nesw')
+        frame_top_right.grid(row=0, column=2,  sticky='nesw')
         frame_bottom_left.grid(row=1, column=0, sticky='ns')
         frame_bottom_center.grid(row=1, column=1, sticky='ns')
-        frame_bottom_right.grid(row=1, column=2, sticky='nsew')
+        frame_bottom_right.grid(row=1, column=2, sticky='nesw')
 
         self.__fill_frame_input(frame_top_left)
         self.__fill_frame_db(frame_top_center)
         self.__fill_frame_scroll_one(frame_bottom_left)
+        self.__fill_frame_scroll_two(frame_bottom_center)
         self.frame_bottom_center = frame_bottom_center
         self.frame_bottom_right = frame_bottom_right
 
@@ -95,20 +103,21 @@ class Gui:
         button_input_output = tk.Button(button_frame, text="Proceed", command=self.handle_click_input_proceed)
         button_input_output.grid(column=1, row=0, padx=5, pady=5)
 
-        input_frame.pack(side=tk.LEFT)
+        input_frame.pack(side=tk.LEFT, fill=tk.BOTH) 
 
     def __fill_frame_db(self, frame):
         input_frame = tk.LabelFrame(frame, text='Input reference file')
-        input_frame.pack(side=tk.LEFT,  padx=5)
 
         label_reference = tk.Label(input_frame, text='245 lines, UID for 12 is needed')
-        label_reference.pack()
+        label_reference.pack(padx=5, pady=10)
 
         button_generate_labels = tk.Button(input_frame, text="Generate Labels")
-        button_generate_labels.pack()
+        button_generate_labels.pack(fill=tk.BOTH,  padx=5)
 
         button_generate_uids = tk.Button(input_frame, text="Generate UIDs")
-        button_generate_uids.pack()
+        button_generate_uids.pack(fill=tk.BOTH,  padx=5)
+
+        input_frame.pack(side=tk.LEFT, fill=tk.Y)
 
     def __fill_frame_scroll_one(self, frame):
         genus_scrollbar = tk.Scrollbar(frame) 
@@ -116,26 +125,24 @@ class Gui:
         genus_list = self.db.get_genus_list()
         for genus in genus_list: 
             genus_listbox.insert(tk.END, genus) 
-        genus_listbox.pack(side = tk.LEFT, fill = tk.BOTH )   
+        genus_listbox.pack(side = tk.LEFT, fill = tk.Y )   
         genus_listbox.bind("<<ListboxSelect>>", self.handle_select_genus) 
         genus_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
 
-    def __fill_frame_scroll_two(self, frame, genus):
+    def __fill_frame_scroll_two(self, frame, genus=None):
         species_scrollbar = tk.Scrollbar(frame) 
         species_listbox = tk.Listbox(frame, yscrollcommand = species_scrollbar.set, width=25 )  
-        species_list = self.db.get_species_list(genus)
-        self.uid_species_reference = []
-        for uid in species_list: 
-            self.uid_species_reference.append(uid)
-            species_listbox.insert(tk.END, species_list[uid]) 
-        species_listbox.pack(side = tk.LEFT, fill = tk.BOTH )    
+        if genus:
+            species_list = self.db.get_species_list(genus)
+            self.uid_species_reference = []
+            for uid in species_list: 
+                self.uid_species_reference.append(uid)
+                species_listbox.insert(tk.END, species_list[uid]) 
+        species_listbox.pack(side = tk.LEFT, fill = tk.Y )    
         species_listbox.bind("<<ListboxSelect>>", self.handle_select_plant) 
         species_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
 
     def __show_images(self, frame, img_file_list):
-        print('__file__ path', os.path.realpath(__file__))
-        print('CWD path', os.getcwd())
-
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
             image = image.resize((100,100))
@@ -181,7 +188,6 @@ class Gui:
             genus = event.widget.get(index)
             self.__clear_frame(self.frame_bottom_center)
             self.__fill_frame_scroll_two(self.frame_bottom_center, genus)
-
 
     def handle_select_plant(self, event):
         selection = event.widget.curselection()
