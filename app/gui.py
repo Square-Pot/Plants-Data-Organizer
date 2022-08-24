@@ -4,6 +4,7 @@ import subprocess
 from configparser import ConfigParser
 import logging
 import tkinter as tk
+from turtle import width
 from PIL import Image, ImageTk
 
 from .folders import FolderStructure
@@ -145,9 +146,27 @@ class Gui:
     def __show_images(self, frame, img_file_list):
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
-            image = image.resize((100,100))
-            photo = ImageTk.PhotoImage(image)
+            
+            thumb_min = int(self.config['GUI']['thumbnail_size'])
 
+            coeff = image.width / image.height
+            if coeff > 1:
+                thumb_w = int(thumb_min * coeff)
+                thumb_h = thumb_min
+            else: 
+                thumb_w = thumb_min
+                thumb_h = int(thumb_min / coeff)
+
+            image = image.resize((thumb_w, thumb_h))
+
+            crop_l = (image.width - thumb_min) / 2
+            crop_r = crop_l + thumb_min
+            crop_u = (image.height - thumb_min) / 2
+            crop_b = crop_u + thumb_min
+
+            image = image.crop((crop_l, crop_u, crop_r, crop_b))
+
+            photo = ImageTk.PhotoImage(image)
             label = tk.Label(frame, image = photo)
             label.image = photo
             label.grid(row=1, column = i)
