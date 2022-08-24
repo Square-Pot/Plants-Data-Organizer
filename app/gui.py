@@ -144,10 +144,16 @@ class Gui:
         species_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
 
     def __show_images(self, frame, img_file_list):
+        frame_width = frame.winfo_width()
+        thumb_min = int(self.config['GUI']['thumbnail_size'])
+
+        max_photos_in_row = frame_width // thumb_min
+
+        num_photos_in_row = 0
+        cur_row = 1
+        cur_col = 0
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
-            
-            thumb_min = int(self.config['GUI']['thumbnail_size'])
 
             coeff = image.width / image.height
             if coeff > 1:
@@ -169,9 +175,22 @@ class Gui:
             photo = ImageTk.PhotoImage(image)
             label = tk.Label(frame, image = photo)
             label.image = photo
-            label.grid(row=1, column = i)
+
+            num_photos_in_row += 1
+            cur_col += 1
+
+            if num_photos_in_row > max_photos_in_row:
+                cur_row += 1
+                cur_col = 1
+
+            label.grid(row=cur_row, column=cur_col)
+
             label.bind("<Button-1>",lambda e,path=path:self.__open_img_in_default_viewer(path))
             i += 1
+
+        self.cur_plant_path = os.path.dirname(os.path.abspath(path))
+        button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_folder)
+        button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
 
 
     @staticmethod
@@ -225,4 +244,8 @@ class Gui:
                                     'win32':'explorer',
                                     'darwin':'open'}[sys.platform]
         subprocess.run([imageViewerFromCommandLine, path])
+
+
+    def __open_folder(self):
+        os.system('xdg-open "%s"' % self.cur_plant_path)
 
