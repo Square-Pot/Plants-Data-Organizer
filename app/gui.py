@@ -197,14 +197,7 @@ class Gui:
 
 
     def __show_plant_info(self, frame):
-        data = {
-            'Field Num':'C350',
-            'Genus':'Lithops',
-            'Species':'karasmontana',
-            'Subspecies':'bla-bla',
-        }
-
-        # data = self.db.get_item(self.cur_uid)
+        data = self.db.get_item(self.cur_uid)
 
         title = self.__get_plant_title(data)
         keys = ':\r'.join(data.keys())
@@ -262,6 +255,7 @@ class Gui:
             img_paths = self.folders.get_img_paths(self.cur_uid)
 
             self.__clear_frame(self.frame_bottom_right)
+            self.__clear_frame(self.frame_top_right)
             self.__show_images(self.frame_bottom_right, img_paths)
             self.__show_plant_info(self.frame_top_right)
 
