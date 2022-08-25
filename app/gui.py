@@ -66,8 +66,10 @@ class Gui:
         self.__fill_frame_scroll_two(frame_bottom_center)
         self.frame_bottom_center = frame_bottom_center
         self.frame_bottom_right = frame_bottom_right
+        self.frame_top_right = frame_top_right
 
         self.uid_species_reference = None
+        self.cur_uid = None
 
     def mainloop(self):
         self.root.mainloop() 
@@ -143,16 +145,79 @@ class Gui:
         species_scrollbar.pack(side = tk.RIGHT, fill = tk.Y) 
 
     def __show_images(self, frame, img_file_list):
+        frame_width = frame.winfo_width()
+        thumb_min = int(self.config['GUI']['thumbnail_size'])
+
+        max_photos_in_row = frame_width // thumb_min
+
+        num_photos_in_row = 0
+        cur_row = 1
+        cur_col = 0
+        path = None
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
-            image = image.resize((100,100))
-            photo = ImageTk.PhotoImage(image)
 
+            coeff = image.width / image.height
+            if coeff > 1:
+                thumb_w = int(thumb_min * coeff)
+                thumb_h = thumb_min
+            else: 
+                thumb_w = thumb_min
+                thumb_h = int(thumb_min / coeff)
+
+            image = image.resize((thumb_w, thumb_h))
+
+            crop_l = (image.width - thumb_min) / 2
+            crop_r = crop_l + thumb_min
+            crop_u = (image.height - thumb_min) / 2
+            crop_b = crop_u + thumb_min
+
+            image = image.crop((crop_l, crop_u, crop_r, crop_b))
+
+            photo = ImageTk.PhotoImage(image)
             label = tk.Label(frame, image = photo)
             label.image = photo
-            label.grid(row=1, column = i)
+
+            num_photos_in_row += 1
+            cur_col += 1
+
+            if num_photos_in_row > max_photos_in_row:
+                cur_row += 1
+                cur_col = 1
+
+            label.grid(row=cur_row, column=cur_col)
+
             label.bind("<Button-1>",lambda e,path=path:self.__open_img_in_default_viewer(path))
             i += 1
+
+        if path:
+            self.cur_plant_path = os.path.dirname(os.path.abspath(path))
+            button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_folder)
+            button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
+
+
+    def __show_plant_info(self, frame):
+
+        data_frame = tk.LabelFrame(frame, text='Plant information', width=25)
+
+        data = self.db.get_item(self.cur_uid)
+        title = self.__get_plant_title(data)
+        keys = ':\r'.join(data.keys())
+        values = '\r'.join(data.values())
+
+        label_title = tk.Label(data_frame, text=title, font=("Helvetica", 12, 'bold'))
+        label_keys = tk.Label(data_frame, text=keys, font=("Helvetica", 9, 'bold'), anchor="w", justify=tk.LEFT)
+        label_values = tk.Label(data_frame, text=values, font=("Helvetica", 9), anchor="w", justify=tk.LEFT)
+
+        #data_frame.grid_columnconfigure(0, weight=1)
+        data_frame.grid_columnconfigure(1, weight=1)
+
+        label_title.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        label_keys.grid(row=1, column=0, padx=5, sticky='w')
+        label_values.grid(row=1, column=1, padx=5, sticky='w')
+
+        data_frame.pack(side = tk.LEFT, fill=tk.BOTH, expand=1)
+
 
 
     @staticmethod
@@ -193,11 +258,16 @@ class Gui:
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
-            uid = self.uid_species_reference[index]
-            img_paths = self.folders.get_img_paths(uid)
+            self.cur_uid = self.uid_species_reference[index]
+            img_paths = self.folders.get_img_paths(self.cur_uid)
 
             self.__clear_frame(self.frame_bottom_right)
+            self.__clear_frame(self.frame_top_right)
             self.__show_images(self.frame_bottom_right, img_paths)
+            self.__show_plant_info(self.frame_top_right)
+
+    def __open_folder(self):
+        os.system('xdg-open "%s"' % self.cur_plant_path)
 
     @staticmethod
     def __open_img_in_default_viewer(path):
@@ -206,4 +276,20 @@ class Gui:
                                     'win32':'explorer',
                                     'darwin':'open'}[sys.platform]
         subprocess.run([imageViewerFromCommandLine, path])
+
+    @staticmethod
+    def __get_plant_title(data:dict) -> str:
+        title = ''
+        if 'number' in data:
+            title += data['number'] + ' '
+        if 'genus' in data:
+            title += data['genus'] + ' '
+        if 'species' in data:
+            title += data['species'] + ' '
+        if 'subspecies' in data:
+            title += 'ssp. '
+            title += data['subspecies']  + ' '
+        return title
+    
+    
 
