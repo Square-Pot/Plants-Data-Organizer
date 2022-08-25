@@ -197,19 +197,26 @@ class Gui:
 
 
     def __show_plant_info(self, frame):
-        data = self.db.get_item(self.cur_uid)
 
+        data_frame = tk.LabelFrame(frame, text='Plant information', width=25)
+
+        data = self.db.get_item(self.cur_uid)
         title = self.__get_plant_title(data)
         keys = ':\r'.join(data.keys())
         values = '\r'.join(data.values())
 
-        label_title = tk.Label(frame, text=title, font=("Helvetica", 14, 'bold'))
-        label_keys = tk.Label(frame, text=keys, font=("Helvetica", 10, 'bold'), anchor="e", justify=tk.LEFT)
-        label_values = tk.Label(frame, text=values, font=("Helvetica", 10), anchor="e", justify=tk.LEFT)
+        label_title = tk.Label(data_frame, text=title, font=("Helvetica", 12, 'bold'))
+        label_keys = tk.Label(data_frame, text=keys, font=("Helvetica", 9, 'bold'), anchor="w", justify=tk.LEFT)
+        label_values = tk.Label(data_frame, text=values, font=("Helvetica", 9), anchor="w", justify=tk.LEFT)
 
-        label_title.grid(row=0, column=0, columnspan=2, sticky='ew')
-        label_keys.grid(row=1, column=0, padx=15, sticky='ew')
-        label_values.grid(row=1, column=1, padx=5, sticky='e')
+        #data_frame.grid_columnconfigure(0, weight=1)
+        data_frame.grid_columnconfigure(1, weight=1)
+
+        label_title.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        label_keys.grid(row=1, column=0, padx=5, sticky='w')
+        label_values.grid(row=1, column=1, padx=5, sticky='w')
+
+        data_frame.pack(side = tk.LEFT, fill=tk.BOTH, expand=1)
 
 
 
@@ -272,7 +279,17 @@ class Gui:
 
     @staticmethod
     def __get_plant_title(data:dict) -> str:
-        return 'Title of plant'
+        title = ''
+        if 'number' in data:
+            title += data['number'] + ' '
+        if 'genus' in data:
+            title += data['genus'] + ' '
+        if 'species' in data:
+            title += data['species'] + ' '
+        if 'subspecies' in data:
+            title += 'ssp. '
+            title += data['subspecies']  + ' '
+        return title
     
     
 
