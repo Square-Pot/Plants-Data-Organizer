@@ -68,89 +68,94 @@ Automatic **recognition** the plants on the photos by the label with a 2D-code (
 ## Источники данных
 
 Приложение использует два вида входных данных: 
-- файлы фотографий растений;
-- справочная информация о растениях: род, вид, дата посева и т.д.
-
-===============================================================================
+- изображение - фотографий растений;
+- текст - справочная информация о растениях: род, вид, дата посева и т.д.
 
 
+### Источники фотографий
 
-### Photo sources
+В текущей версии фотографии могут быть доставлены в приложение тремя способами: 
+1. Расположить файлы фотографий в папку `INPUT` в корневой директории приложений. Приложение их проанализирует (попытается распознать растения на фото) и, в зависимости от результата, переместит файлы в папку `Successful` или `Unsuccessful`.
+2. Добавить путь (или несколько путей) к директории с фотографиями в файл `input_paths.txt`. Приложение проанализирует все фотографии по указанным путям в режиме *только чтение*. 
+3. Фото растений, не имеющих матриц данных либо имеющих, но не декодированных, могут вручную помещены непосредственно в папку нужного растения, подпапку `LABEL_REQURED`. Такие фотографии будут также обработаны, т.е. на них будут нанесена информация о тех растениях, в папку которых они были размещены. 
 
-In current version you can provide photos of your plants in three ways: 
-1. Put photos to `INPUT` folder in root dir. The app will process them and depending on the result move files to `Successful` or `Unsuccessful` subfolder. 
-2. Add path (or multiple paths) of the location where your photos are stored to the `input_paths.txt` file. The app will process all image files in this locations and in subfolders recursively in *read_only* mode. 
-3. Photos of plants without or undecoded data-matrix label can be manually put to the particular plant's folder `LABEL_REQURED` subfolder. Such photos will be also processed according and marked with label according to the plant folder. 
+### Источник справочной информации
 
-### Reference information source
+- В текущей версии справочная информация может быть получена из csv-файла. Которые в свою очередь может быть легко получен из таблицы Excel, наверняка у вас уже имеющейся. 
+- В плане разработки также стоит возможность получать информацию из облачных офисных приложены, таких как Google Spreadsheet.
 
-- In current version reference information can be extracted from csv-file. It can be easy created from the list of plants in Excel which you probably have.
-- There are plans to make an possibillity to read info from cloud-stored spreadsheet, like Google Spreadsheet. 
+#### CSV-файл
 
-#### CSV-file
+Основные требования к csv-файлу:
+- корректные имена заголовков в первой строке;
+- заполненный столбец UID.
 
-The main csv-file requirements  are: 
-- correct column names in first line;
-- filled UID column.
+Использование таких простых форматов (а не использование баз данных, например) позволяет получить данные как через приложение, так и стандартными средствами (текстовый редактор, редактор электорнных таблиц). Тем не менее, есть много неудобств при редактировании csv-файла. Вероятно, использование данного формата носит временный характер.
 
-There are multiple inconveniences by editing csv-file, for example: during file opening type of UID column should be choosen as 'text', otherwise as 'number' by default the UID values with zero at the first place will loose it, wich means UID will be modified by opening, wich is unacceptable. Considering this csv format is using as temporary.
+#### XLSX-файл
 
-#### XLSX-file
-
-Local XLSX-file, XMLX-file in the cloud or online spreadsheet (like Goolge Spreadsheet) support will be added as soon as possible.
+Локальный XLSX-файл, онлайн таблица (например, Goolge Spreadsheet) будут поддерживаться в следующих релизах.
 
 
-## Detection and recognition
+## Детектирование и декодирование
 
-There are three possible cases with detection and recognition:
-1. The photo has Data Matrix wich was detected and plant recignized successfully
-2. The photo has Data Matrix but for some reason it was not detected or recognized or was recognized wrong or recogized correctly, but not found in data base. 
-3. The photo doesn't have any Data Matrix, so recognition is possible. 
+Существует три вероятных сценария, связанных с обнаружением матрицы данных и ее декодированием: 
+1. Фото имеет матрицу данных, которая была успешно обнаружена и декодирована.
+2. Фото имеет матрицу данных, но по каким-то причинам она не была обнаружена или декодированиа или была обнаружена но не была декодирована или была обнаружена и декодирована, но данный не были найдены в базе данных. 
+3. Фото не имеет матрицу данных. 
 
-Photos from cases 2 and 3, if you can identify plant on it, can be manually places to the required plant folder `LABEL_REQURED` subfolder.  See [Photo Sources](#photo-sources) section.
+Для случаем 2 и 3 возможно ручное размещение фотографии в папке требуемого растения подпапке `LABEL_REQURED`.  См. пункт [Источники фотографий](#источники-фотографий).
 
-## Photo files organizing
+
+## Организация файлов фотографий
 The first step after app runnig is to create or update output folder structure. The output folder structure matches the database (reference file) structure exactly and represents inividual folder for each plant. The Name of individula plant folder containts UID and plant name (genus, species, etc.). If you manually delete some plant folder or delete the output folder structure completely, it will be recreated after next app lounch. 
 
-Each plant folder also has a subfolder with name `LABEL_REQURED` for labeling manual recognised plants photos. 
+Первым этапом после запуска приложения явлется актуализация (или создание, если запуск выполняется впервые) папочной структуры. Выходная папочная структура в точности соответствует структуре [базы данных](#источник-справочной-информации) и содержит индивидуальную директорию для каждого растения. Имя папки содержит UID и имя растения (род, вид и т.д.). Если вы случайно удалите папку какого-то растения или всю структуру, то они будут вновь созданы при следующем запуске (но не их содержимое!). 
 
-## Result examples
+Папка каждого растения также содержит подпапку с именем `LABEL_REQURED`, в которую можно поместить вручную распознанные фотографии для нанесения лейбла. 
 
-- Resulting photo of manually recognized plant:  
+
+## Примеры результатов
+
+- Результирующее фото вручную распознанного растения:  
 
  [![name](https://i.imgur.com/eKc0SbYt.jpg)](https://imgur.com/eKc0SbY)   
 
 
-- Resulting photo of two autmatically recognized plants:  
+- Результирующее фото автоматически распознанного растения:  
 
  [![name](https://i.imgur.com/lKOVYqLt.jpg)](https://imgur.com/lKOVYqL)   
 
-- Resulting photo of multiple autmatically recognized plants:  
+- Результирующее фото с несколькими растениями, распознанными автоматически:  
 
  [![name](https://i.imgur.com/JVWe48Tt.jpg)](https://imgur.com/JVWe48T)   
 
 
-## Creating labels
-A PDF file with labels can be generated according to the reference file. The next steps for creating smart and durable physical labels are: 
-- cut out each paper label; 
-- laminate it using as thicker laminating film as you can get;
-- leave at least 2 mm gap between paper labels (for insulation of paper);
-- cut out each laminated label;
-- make oblique cut of the side of lable wich will be put into the soil. 
+## Создание меток
+PDF-макет с метками может быть сгенерирован для последующей печати и ламинации. Следующие шаги описывают технологию ручного изготовления износоусточивых меток:
+- распечатать PDF-файл;
+- вырезать метки; 
+- заламинировать метки используя настолько толстую ламинирующую плёнку, какую только можно купить;
+- ламинируя следует оставлять минимальный зазор 2-4 мм между метками, чтобы обеспечить герметичность;
+- вырезать заламинированные метки;
+- сделать косой срез со стороны, которая будет втыкаться в субстрат.  
 
 ![Lable](img/label.png)
 
-PDF-generator is not implemented in this repo yet, but it's ready and it will be here soon. 
+Генератор макета еще не внедрен в текущий релиз. Но он реализован и появится здесь настолько быстро, насколько это возможно. 
+
 
 
 ## FAQ
 
-### Q: Is it works on Windows / Mac?
+### Q: Будет ли это на Windows / Mac?
 As all code is python, theoretically - yes. But more likely some refactoring is needed for crossplatform support. If you Windows / Mac user, you can contribute as a tester.
+Т.к. всё написано на python, то теоретически - да. Но с большой долей вероятности для кроссплатформенной работы потребуется какой-то рефакторинг. Если вы являетесь пользователем Windows / Mac, вы может поучаствовать в проекте, хотя бы как тестировщик. 
 
-### Q: What code encoded in Data Matrix? 
-Only UID - a unque identifier - 6 (or more) digits number. All other plant infromation is retrieved from reference file by UID. 
+### Q: Какой код содержит матрица данных на метках? 
+Только UID - уникальный идентификатор, состоящий из 6 (или более) цифр. Вся остальная информация получается из [базы данных](#источник-справочной-информации) по UID. 
 
-### Q: Where to get a model for a neural network?
+### Q: Где взять модель для нейросети?
 Ask me. It's not a secret, it's just too big to store it in GitHub.
+Просто попросите меня любым способом. Она не секретная, просто слишком объемная, чтобы хранить ее на GitHub.
 
