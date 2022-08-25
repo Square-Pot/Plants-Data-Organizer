@@ -6,8 +6,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/spalk/DataMatrix-Sorter.svg?style=flat-square&label=github%20stars)](https://github.com/spalk/DataMatrix-Sorter)
 [![GitHub Contributors](https://img.shields.io/github/contributors/spalk/DataMatrix-Sorter.svg?style=flat-square)](https://github.com/spalk/DataMatrix-Sorter/graphs/contributors)
 
-Automatic **recognition** the plants on the photos by the label with a 2D-code (Data Matrix), photos of plants **organizing** and **marking** it wiht plant information: genus, species, age, etc. Useful tool for botanists and plants collectors.
-
 Автоматическое **распознавание** растений на фотографии по двухмерному коду (Дата Матрице), **организация** фотографий растений, а также **маркирование**  фотографий информацией о данном растении: род, вид, возраст и т.д.  Удобный инструмент для ботаников и коллекционеров растений. 
 
 
@@ -15,15 +13,15 @@ Automatic **recognition** the plants on the photos by the label with a 2D-code (
 - [Описание](#описание)
 - [Логика приложения](#логика-приложения)
 - [Источники данных](#источники-данных) 
-  - [Photo sources](#photo-sources)
-  - [Reference information source](#reference-information-source)
-    - [CSV-file](#csv-file)
-    - [XLSX-file](#xlsx-file)
-- [Detection and recognition](#detection-and-recognition)
-- [Photo files organizing](#photo-files-organizing)
-- [Reusult examples](#result-examples)
-- [Creating labels](#creating-labels)
-- [FAQ](#creating-phisical-labels)
+  - [Источники фотографий](#источники-фотографий)
+  - [Источник справочной информации](#источник-справочной-информации)
+    - [CSV-файл](#csv-файл)
+    - [XLSX-файл](#xlsx-файл)
+- [Детектирование и декодирование](#детектирование-и-декодирование)
+- [Организация файлов фотографий](#организация-файлов-фотографий)
+- [Примеры результатов](#примеры-результатов)
+- [Создание меток](#создание-меток)
+- [FAQ](#faq)
 
 ## Введение
 
@@ -108,8 +106,6 @@ Automatic **recognition** the plants on the photos by the label with a 2D-code (
 
 
 ## Организация файлов фотографий
-The first step after app runnig is to create or update output folder structure. The output folder structure matches the database (reference file) structure exactly and represents inividual folder for each plant. The Name of individula plant folder containts UID and plant name (genus, species, etc.). If you manually delete some plant folder or delete the output folder structure completely, it will be recreated after next app lounch. 
-
 Первым этапом после запуска приложения явлется актуализация (или создание, если запуск выполняется впервые) папочной структуры. Выходная папочная структура в точности соответствует структуре [базы данных](#источник-справочной-информации) и содержит индивидуальную директорию для каждого растения. Имя папки содержит UID и имя растения (род, вид и т.д.). Если вы случайно удалите папку какого-то растения или всю структуру, то они будут вновь созданы при следующем запуске (но не их содержимое!). 
 
 Папка каждого растения также содержит подпапку с именем `LABEL_REQURED`, в которую можно поместить вручную распознанные фотографии для нанесения лейбла. 
@@ -149,13 +145,11 @@ PDF-макет с метками может быть сгенерирован д
 ## FAQ
 
 ### Q: Будет ли это на Windows / Mac?
-As all code is python, theoretically - yes. But more likely some refactoring is needed for crossplatform support. If you Windows / Mac user, you can contribute as a tester.
 Т.к. всё написано на python, то теоретически - да. Но с большой долей вероятности для кроссплатформенной работы потребуется какой-то рефакторинг. Если вы являетесь пользователем Windows / Mac, вы может поучаствовать в проекте, хотя бы как тестировщик. 
 
 ### Q: Какой код содержит матрица данных на метках? 
 Только UID - уникальный идентификатор, состоящий из 6 (или более) цифр. Вся остальная информация получается из [базы данных](#источник-справочной-информации) по UID. 
 
 ### Q: Где взять модель для нейросети?
-Ask me. It's not a secret, it's just too big to store it in GitHub.
 Просто попросите меня любым способом. Она не секретная, просто слишком объемная, чтобы хранить ее на GitHub.
 
