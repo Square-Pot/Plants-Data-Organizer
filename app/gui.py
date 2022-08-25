@@ -4,7 +4,6 @@ import subprocess
 from configparser import ConfigParser
 import logging
 import tkinter as tk
-from turtle import width
 from PIL import Image, ImageTk
 
 from .folders import FolderStructure
@@ -67,8 +66,10 @@ class Gui:
         self.__fill_frame_scroll_two(frame_bottom_center)
         self.frame_bottom_center = frame_bottom_center
         self.frame_bottom_right = frame_bottom_right
+        self.frame_top_right = frame_top_right
 
         self.uid_species_reference = None
+        self.cur_uid = None
 
     def mainloop(self):
         self.root.mainloop() 
@@ -152,6 +153,7 @@ class Gui:
         num_photos_in_row = 0
         cur_row = 1
         cur_col = 0
+        path = None
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
 
@@ -188,9 +190,34 @@ class Gui:
             label.bind("<Button-1>",lambda e,path=path:self.__open_img_in_default_viewer(path))
             i += 1
 
-        self.cur_plant_path = os.path.dirname(os.path.abspath(path))
-        button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_folder)
-        button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
+        if path:
+            self.cur_plant_path = os.path.dirname(os.path.abspath(path))
+            button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_folder)
+            button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
+
+
+    def __show_plant_info(self, frame):
+        data = {
+            'Field Num':'C350',
+            'Genus':'Lithops',
+            'Species':'karasmontana',
+            'Subspecies':'bla-bla',
+        }
+
+        # data = self.db.get_item(self.cur_uid)
+
+        title = self.__get_plant_title(data)
+        keys = ':\r'.join(data.keys())
+        values = '\r'.join(data.values())
+
+        label_title = tk.Label(frame, text=title, font=("Helvetica", 14, 'bold'))
+        label_keys = tk.Label(frame, text=keys, font=("Helvetica", 10, 'bold'), anchor="e", justify=tk.LEFT)
+        label_values = tk.Label(frame, text=values, font=("Helvetica", 10), anchor="e", justify=tk.LEFT)
+
+        label_title.grid(row=0, column=0, columnspan=2, sticky='ew')
+        label_keys.grid(row=1, column=0, padx=15, sticky='ew')
+        label_values.grid(row=1, column=1, padx=5, sticky='e')
+
 
 
     @staticmethod
@@ -231,11 +258,15 @@ class Gui:
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
-            uid = self.uid_species_reference[index]
-            img_paths = self.folders.get_img_paths(uid)
+            self.cur_uid = self.uid_species_reference[index]
+            img_paths = self.folders.get_img_paths(self.cur_uid)
 
             self.__clear_frame(self.frame_bottom_right)
             self.__show_images(self.frame_bottom_right, img_paths)
+            self.__show_plant_info(self.frame_top_right)
+
+    def __open_folder(self):
+        os.system('xdg-open "%s"' % self.cur_plant_path)
 
     @staticmethod
     def __open_img_in_default_viewer(path):
@@ -245,7 +276,9 @@ class Gui:
                                     'darwin':'open'}[sys.platform]
         subprocess.run([imageViewerFromCommandLine, path])
 
-
-    def __open_folder(self):
-        os.system('xdg-open "%s"' % self.cur_plant_path)
+    @staticmethod
+    def __get_plant_title(data:dict) -> str:
+        return 'Title of plant'
+    
+    
 
