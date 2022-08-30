@@ -184,6 +184,7 @@ class Gui:
             if num_photos_in_row > max_photos_in_row:
                 cur_row += 1
                 cur_col = 1
+                num_photos_in_row = 0
 
             label.grid(row=cur_row, column=cur_col)
 
