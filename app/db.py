@@ -17,6 +17,7 @@ class DB:
         self.data = {}
         self.csv_file_path = csv_file_path
         self.file_lines = None
+        self.keys = None
         self.__read()
         self.__create_keys_from_titles()
         self.__extract_data()
