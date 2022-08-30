@@ -243,61 +243,6 @@ class Gui:
         # TODO next line is definitely not cross platform
         os.system('gedit %s' % paths_file_path)
 
-    def handle_click_show_table(self):
-        self.window_table = tk.Toplevel(self.root)
-        self.window_table.title("Plant List")
-        self.window_table.geometry("1000x600") 
-        self.__fill_table()
-
-    def __fill_table(self):
-        table_frame = tk.Frame(self.window_table)
-        table_frame.pack()
-
-        #scrollbar
-        scroll_v = tk.Scrollbar(table_frame)
-        scroll_v.pack(side=tk.RIGHT, fill=tk.Y)
-
-        scroll_h = tk.Scrollbar(table_frame,orient='horizontal')
-        scroll_h.pack(side=tk.BOTTOM,fill=tk.X)
-
-        table = ttk.Treeview(table_frame,yscrollcommand=scroll_v.set, xscrollcommand =scroll_h.set)
-
-        table.pack()
-
-        scroll_v.config(command=table.yview)
-        scroll_h.config(command=table.xview)
-
-        #define our column
-        columns = self.db.keys
-        if columns[-1] == '\n':
-            columns.pop()
-        table['columns'] = tuple(columns)
-
-        # format our column
-        table.column("#0", width=0,  stretch=tk.NO)
-        for col in columns:
-            table.column(col, width=100)    
-            # table.column("player_id",anchor=tk.CENTER, width=80)
-
-        #Create Headings 
-        for col in columns:
-            table.heading(col, text=col, anchor=tk.CENTER)    
-            # table.heading("#0",text="",anchor=tk.CENTER)
-    
-        #add data 
-        data = self.db.get_data()
-        for id, uid in enumerate(data):
-            item = data[uid]
-            values = []
-            for key in columns:
-                if key in item:
-                    values.append(item[key])
-                else:
-                    values.append('')
-            print(values)
-            table.insert(parent='',index='end',iid=id,text='',values=tuple(values))
-        table.pack()
-
     def handle_select_genus(self, event):
         selection = event.widget.curselection()
         if selection:
@@ -317,8 +262,6 @@ class Gui:
             self.__clear_frame(self.frame_top_right)
             self.__show_images(self.frame_bottom_right, img_paths)
             self.__show_plant_info(self.frame_top_right)
-
-
 
     @staticmethod
     def __open_img_in_default_viewer(path):
@@ -347,3 +290,68 @@ class Gui:
         for widgets in frame.winfo_children():
             widgets.destroy()    
 
+    ### SHOW PLANTS WINDOW
+
+    def handle_click_show_table(self):
+        self.window_table = tk.Toplevel(self.root)
+        self.window_table.title("Plant List")
+        self.window_table.geometry("1000x600") 
+        self.__fill_table()
+
+    def __fill_table(self):
+        table_frame = tk.Frame(self.window_table)
+        table_frame.pack()
+
+        #scrollbar
+        scroll_v = tk.Scrollbar(table_frame)
+        scroll_v.pack(side=tk.RIGHT, fill=tk.Y)
+
+        scroll_h = tk.Scrollbar(table_frame,orient='horizontal')
+        scroll_h.pack(side=tk.BOTTOM,fill=tk.X)
+
+        self.table = ttk.Treeview(table_frame,yscrollcommand=scroll_v.set, xscrollcommand =scroll_h.set)
+
+        self.table.pack()
+
+        scroll_v.config(command=self.table.yview)
+        scroll_h.config(command=self.table.xview)
+
+        #define our column
+        columns = self.db.keys
+        if columns[-1] == '\n':
+            columns.pop()
+        self.table['columns'] = tuple(columns)
+
+        # format our column
+        self.table.column("#0", width=0,  stretch=tk.NO)
+        for col in columns:
+            self.table.column(col, width=100)    
+            # table.column("player_id",anchor=tk.CENTER, width=80)
+
+        #Create Headings 
+        for col in columns:
+            self.table.heading(col, text=col, anchor=tk.CENTER)    
+            # table.heading("#0",text="",anchor=tk.CENTER)
+    
+        #add data 
+        data = self.db.get_data()
+        for id, uid in enumerate(data):
+            item = data[uid]
+            values = []
+            for key in columns:
+                if key in item:
+                    values.append(item[key])
+                else:
+                    values.append('')
+            self.table.insert(parent='',index='end',iid=id,text='',values=tuple(values))
+        self.table.pack()
+
+        button_show_selected = tk.Button(table_frame, text="Show selected", command=self.handle_click_selected_plants)
+        button_show_selected.pack(fill=tk.BOTH,  padx=5)
+
+    def handle_click_selected_plants(self):
+        selected_row_ids = self.table.selection()
+        for iid in selected_row_ids:
+            item = self.table.item(iid)
+            plant_data = item['values']
+            print(plant_data)
