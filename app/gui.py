@@ -303,7 +303,7 @@ class Gui:
 
     def __fill_table(self):
         table_frame = tk.Frame(self.window_table)
-        table_frame.pack()
+        table_frame.pack(fill=tk.BOTH, expand=True)
 
         #scrollbar
         scroll_v = tk.Scrollbar(table_frame)
@@ -314,7 +314,7 @@ class Gui:
 
         self.table = ttk.Treeview(table_frame,yscrollcommand=scroll_v.set, xscrollcommand =scroll_h.set)
 
-        self.table.pack()
+        self.table.pack(fill=tk.BOTH, expand=True)
 
         scroll_v.config(command=self.table.yview)
         scroll_h.config(command=self.table.xview)
@@ -329,12 +329,12 @@ class Gui:
         self.table.column("#0", width=0,  stretch=tk.NO)
         for col in columns:
             self.table.column(col, width=100)    
-            # table.column("player_id",anchor=tk.CENTER, width=80)
 
-        #Create Headings 
-        for col in columns:
+
+        # create Headings 
+        for col in columns: 
             self.table.heading(col, text=col, anchor=tk.CENTER)    
-            # table.heading("#0",text="",anchor=tk.CENTER)
+           
     
         #add data 
         data = self.db.get_data()
@@ -349,11 +349,11 @@ class Gui:
             self.table.insert(parent='',index='end',iid=id,text='',values=tuple(values))
         self.table.pack()
 
-        button_generate_labels = tk.Button(table_frame, text="Print Labels", command=self.handle_click_selected_plants)
+        button_generate_labels = tk.Button(table_frame, text="Generate Labels", command=self.handle_click_selected_plants)
         button_open_labels_fld = tk.Button(table_frame, text="Open Labels folder ", command=self.__open_labels_folder)
         # button_show_selected.pack(fill=tk.BOTH,  padx=5)
-        button_generate_labels.pack(padx=5)
-        button_open_labels_fld.pack(padx=5)
+        button_generate_labels.pack(side=tk.RIGHT, padx=1)
+        button_open_labels_fld.pack(side=tk.RIGHT, padx=1)
 
     def __open_labels_folder(self):
         os.system('xdg-open "%s"' % 'LABELS')
