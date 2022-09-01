@@ -1,3 +1,4 @@
+from importlib.resources import path
 import os
 import sys
 import subprocess
@@ -11,6 +12,8 @@ from .folders import FolderStructure
 from .sources import Source
 from .processor import Processor
 from .db import DB
+from .classes import get_plant_as_obj
+from .label_builder import LabelsBuilder
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -194,7 +197,7 @@ class Gui:
 
         if path:
             self.cur_plant_path = os.path.dirname(os.path.abspath(path))
-            button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_folder)
+            button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_plant_folder)
             button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
 
     def __show_plant_info(self, frame):
@@ -219,7 +222,7 @@ class Gui:
 
         data_frame.pack(side = tk.LEFT, fill=tk.BOTH, expand=1)
 
-    def __open_folder(self):
+    def __open_plant_folder(self):
         os.system('xdg-open "%s"' % self.cur_plant_path)
 
     def handle_click_input_proceed(self):
@@ -346,12 +349,28 @@ class Gui:
             self.table.insert(parent='',index='end',iid=id,text='',values=tuple(values))
         self.table.pack()
 
-        button_show_selected = tk.Button(table_frame, text="Show selected", command=self.handle_click_selected_plants)
-        button_show_selected.pack(fill=tk.BOTH,  padx=5)
+        button_generate_labels = tk.Button(table_frame, text="Print Labels", command=self.handle_click_selected_plants)
+        button_open_labels_fld = tk.Button(table_frame, text="Open Labels folder ", command=self.__open_labels_folder)
+        # button_show_selected.pack(fill=tk.BOTH,  padx=5)
+        button_generate_labels.pack(padx=5)
+        button_open_labels_fld.pack(padx=5)
+
+    def __open_labels_folder(self):
+        os.system('xdg-open "%s"' % 'LABELS')
 
     def handle_click_selected_plants(self):
+        Plants = []
         selected_row_ids = self.table.selection()
         for iid in selected_row_ids:
             item = self.table.item(iid)
-            plant_data = item['values']
-            print(plant_data)
+            plant_data_values = item['values']
+            plant_as_dict = {}
+            for i, val in enumerate(plant_data_values):
+                plant_as_dict[self.db.keys[i].lower()] = val
+            plant_as_obj = get_plant_as_obj(plant_as_dict)
+            Plants.append(plant_as_obj)
+
+        label_bld = LabelsBuilder(Plants)
+        label_bld.generate_labels()
+        path_to_pdf = label_bld.get_pdf()
+        print(path_to_pdf)
