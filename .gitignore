@@ -1,5 +1,6 @@
 INPUT/
 OUTPUT/
+LABELS/
 
 plants_export.txt
 *.pth
