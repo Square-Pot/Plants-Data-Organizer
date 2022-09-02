@@ -86,7 +86,7 @@ class Gui:
             checkbox_input.select()
         checkbox_input.pack(anchor=tk.W, padx=5)
 
-        checkbox_paths = tk.Checkbutton(input_frame, text=f'Paths [{ self.source.count_input() }]', variable=self.checkbox_paths_var)
+        checkbox_paths = tk.Checkbutton(input_frame, text=f'Paths [{ self.source.count_paths() }]', variable=self.checkbox_paths_var)
         if int(self.config['SOURCES']['paths']):
             checkbox_paths.select()
         checkbox_paths.pack(anchor=tk.W, padx=5)
