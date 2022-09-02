@@ -370,7 +370,7 @@ class Gui:
             plant_as_obj = get_plant_as_obj(plant_as_dict)
             Plants.append(plant_as_obj)
 
-        label_bld = LabelsBuilder(Plants)
+        label_bld = LabelsBuilder(self.folders, Plants)
         label_bld.generate_labels()
         path_to_pdf = label_bld.get_pdf()
         print(path_to_pdf)

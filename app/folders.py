@@ -19,6 +19,7 @@ class FolderStructure:
         self.input_folder = self.config['PATHS']['input_folder']
         self.current_structure = {}
         self.unsuccessful_folder = None
+        self.pdf_label_folder = self.config['PATHS']['pdf_labels_folder']
 
     def sync_with_db(self, db_object):
         """
@@ -78,10 +79,6 @@ class FolderStructure:
                     )
                 )
         return img_paths
-
-        
-        
-            
 
     @staticmethod
     def __create_photo_filename(uid: str, dt, extension):
@@ -200,6 +197,13 @@ class FolderStructure:
                 if re.match(r'\d+', uid):
                     self.__create_item_folder(db_data[uid])
                     logger.info('Folder for UID: %s was not found. Now created', uid)
+
+    def check_pdf_labels_folder(self):
+        if not os.path.exists(self.pdf_label_folder):
+            os.mkdir(self.pdf_label_folder)
+
+    def get_pdf_label_folder(self):
+        return self.pdf_label_folder
 
 
 def main():
