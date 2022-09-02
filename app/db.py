@@ -18,9 +18,11 @@ class DB:
         self.csv_file_path = csv_file_path
         self.file_lines = None
         self.keys = None
+        self.no_uid_lines_indexes = []
         self.__read()
         self.__create_keys_from_titles()
         self.__extract_data()
+
         
 
     def __read(self):
@@ -34,10 +36,15 @@ class DB:
     def __create_keys_from_titles(self):
         if self.file_lines:
             self.keys = self.file_lines[0].split(DB.SEPARATOR)
-        
+
+    def __get_genus_key_index(self):
+        for index, key in enumerate(self.keys):
+            if 'genus' in key: 
+                return index
+
     def __extract_data(self):
         if self.file_lines:
-            for line in self.file_lines[1:]:
+            for index, line in enumerate(self.file_lines[1:]):
                 fields = line.split(DB.SEPARATOR)
                 if len(fields) > 1:
                     uid = fields[0]
@@ -48,6 +55,15 @@ class DB:
                                 key = self.keys[i]
                                 data[key] = field
                         self.data[uid] = data
+                    else: 
+                        if len(fields[self.__get_genus_key_index()]) > 2:
+                            self.no_uid_lines_indexes.append(index-1)
+
+    def __make_backup(self):
+        with open(self.csv_file_path) as f:
+            lines = f.readlines()
+            with open("out.txt", "w") as f1:
+                f1.writelines(lines)
 
     def get_data(self):
         return self.data
@@ -89,6 +105,11 @@ class DB:
                 
         #species_list.sort()
         return species_list
+
+    def get_number_with_no_uid(self):
+        return len(self.no_uid_lines_indexes)
+
+
 
 
 def main():

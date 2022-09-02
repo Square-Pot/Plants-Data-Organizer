@@ -120,7 +120,7 @@ class Gui:
         button_generate_labels = tk.Button(input_frame, text="Generate Labels", command=self.handle_click_show_table)
         button_generate_labels.pack(fill=tk.BOTH,  padx=5)
 
-        button_generate_uids = tk.Button(input_frame, text="Generate UIDs")
+        button_generate_uids = tk.Button(input_frame, text=f"Generate UIDs [{ self.db.get_number_with_no_uid() }]")
         button_generate_uids.pack(fill=tk.BOTH,  padx=5)
 
         input_frame.pack(side=tk.LEFT, fill=tk.Y)
