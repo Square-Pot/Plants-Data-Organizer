@@ -1,6 +1,9 @@
 import re
 import os
+from random import randint
 import logging
+
+from .classes import GenusColumnNotFoundError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -19,11 +22,10 @@ class DB:
         self.file_lines = None
         self.keys = None
         self.no_uid_lines_indexes = []
+        self.genus_key_index = None
         self.__read()
         self.__create_keys_from_titles()
         self.__extract_data()
-
-        
 
     def __read(self):
         if os.path.exists(self.csv_file_path):
@@ -36,11 +38,14 @@ class DB:
     def __create_keys_from_titles(self):
         if self.file_lines:
             self.keys = self.file_lines[0].split(DB.SEPARATOR)
+            self.genus_key_index = self.__get_genus_key_index()
+                
 
     def __get_genus_key_index(self):
         for index, key in enumerate(self.keys):
             if 'genus' in key: 
                 return index
+        raise GenusColumnNotFoundError
 
     def __extract_data(self):
         if self.file_lines:
@@ -56,14 +61,21 @@ class DB:
                                 data[key] = field
                         self.data[uid] = data
                     else: 
-                        if len(fields[self.__get_genus_key_index()]) > 2:
-                            self.no_uid_lines_indexes.append(index-1)
+                        if len(fields[self.genus_key_index]) > 2:
+                            print('>2')
+                            self.no_uid_lines_indexes.append(index+1)
 
     def __make_backup(self):
-        with open(self.csv_file_path) as f:
-            lines = f.readlines()
-            with open("out.txt", "w") as f1:
-                f1.writelines(lines)
+        with open(self.csv_file_path) as original:
+            lines = original.readlines()
+            with open(self.csv_file_path + '.backup', "w") as backup:
+                backup.writelines(lines)
+
+    def __get_new_uid(self, additionals_uids):
+        while True:
+            new_uid = str(self.random_with_N_digits(6))
+            if new_uid not in self.data and new_uid not in additionals_uids:
+                return new_uid
 
     def get_data(self):
         return self.data
@@ -108,6 +120,33 @@ class DB:
 
     def get_number_with_no_uid(self):
         return len(self.no_uid_lines_indexes)
+
+    def fill_empty_uids(self):
+        self.__make_backup()
+        with open(self.csv_file_path) as f: 
+            lines = f.readlines()
+
+        delimiter = '|'
+        new_uids = []
+        for i in self.no_uid_lines_indexes:
+            line = lines[i]
+            line_list = line.split(delimiter)
+
+            line_list[0] = self.__get_new_uid(new_uids)
+            lines[i] = delimiter.join(line_list)
+
+        with open(self.csv_file_path, 'w') as f:
+            f.writelines(lines)
+
+    def reinit(self):
+        self.__init__(self.csv_file_path)
+
+    @staticmethod        
+    def random_with_N_digits(n):
+        range_start = 10**(n-1)
+        range_end = (10**n)-1
+        return randint(range_start, range_end)
+
 
 
 

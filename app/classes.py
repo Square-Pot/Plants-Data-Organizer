@@ -217,3 +217,12 @@ class Plant:
 def get_plant_as_obj(data: dict) -> Plant:
     return json.loads(json.dumps(data), object_hook=Plant)
 
+
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+
+
+class GenusColumnNotFoundError(Error):
+    """Raised when genus column was not found"""
+    pass

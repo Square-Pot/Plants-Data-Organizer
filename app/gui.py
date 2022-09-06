@@ -50,21 +50,23 @@ class Gui:
         self.root.grid_columnconfigure(1, minsize=200)
         self.root.grid_columnconfigure(2, weight=1, minsize=500)
 
-        frame_top_left = tk.Frame(self.root, width=left_col_width, height=top_row_height, pady=padding, padx=padding)
+        self.frame_top_left = tk.Frame(self.root, width=left_col_width, height=top_row_height, pady=padding, padx=padding)
         frame_top_center = tk.Frame(self.root, width=center_col_width, height=top_row_height, pady=padding, padx=padding)
         frame_top_right = tk.Frame(self.root, width=rigth_col_width, height=top_row_height, pady=padding, padx=padding)
         frame_bottom_left = tk.Frame(self.root, width=left_col_width, height=bottom_row_hight, pady=padding, padx=padding)
         frame_bottom_center = tk.Frame(self.root, width=center_col_width, height=bottom_row_hight, pady=padding, padx=padding)
         frame_bottom_right = tk.Frame(self.root, width=rigth_col_width, height=bottom_row_hight, pady=padding, padx=padding)
 
-        frame_top_left.grid(row=0, column=0, sticky='nesw')
+        self.frame_top_left.grid(row=0, column=0, sticky='nesw')
         frame_top_center.grid(row=0, column=1, sticky='nesw')
         frame_top_right.grid(row=0, column=2,  sticky='nesw')
         frame_bottom_left.grid(row=1, column=0, sticky='ns')
         frame_bottom_center.grid(row=1, column=1, sticky='ns')
         frame_bottom_right.grid(row=1, column=2, sticky='nesw')
 
-        self.__fill_frame_input(frame_top_left)
+        self.btn_generate_uids_text = tk.StringVar()
+
+        self.__fill_frame_input(self.frame_top_left)
         self.__fill_frame_db(frame_top_center)
         self.__fill_frame_scroll_one(frame_bottom_left)
         self.__fill_frame_scroll_two(frame_bottom_center)
@@ -120,7 +122,8 @@ class Gui:
         button_generate_labels = tk.Button(input_frame, text="Generate Labels", command=self.handle_click_show_table)
         button_generate_labels.pack(fill=tk.BOTH,  padx=5)
 
-        button_generate_uids = tk.Button(input_frame, text=f"Generate UIDs [{ self.db.get_number_with_no_uid() }]")
+        self.btn_generate_uids_text.set(f"Generate UIDs [{ self.db.get_number_with_no_uid() }]")
+        button_generate_uids = tk.Button(input_frame, textvariable=self.btn_generate_uids_text, command=self.handle_click_generate_uids)
         button_generate_uids.pack(fill=tk.BOTH,  padx=5)
 
         input_frame.pack(side=tk.LEFT, fill=tk.Y)
@@ -265,6 +268,14 @@ class Gui:
             self.__clear_frame(self.frame_top_right)
             self.__show_images(self.frame_bottom_right, img_paths)
             self.__show_plant_info(self.frame_top_right)
+
+    def handle_click_generate_uids(self):
+        self.db.fill_empty_uids()
+        self.db.reinit()
+        self.__update_btn_generate_uids()
+
+    def __update_btn_generate_uids(self):
+        self.btn_generate_uids_text.set(f"Generate UIDs [{ self.db.get_number_with_no_uid() }]")
 
     @staticmethod
     def __open_img_in_default_viewer(path):
