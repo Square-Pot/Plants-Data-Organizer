@@ -6,6 +6,7 @@ from .folders import FolderStructure
 from .sources import Source
 from .classes import TargetImage
 from .dmtx_detector import DataMatrixDetector
+from .hash import Hash
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -19,6 +20,7 @@ class Processor:
         self.db = DB(self.config['DATABASE']['csv_file'])
         self.folders = FolderStructure(self.config)
         self.folders.sync_with_db(self.db)
+        self.hash = Hash(self.config)
         self.dmd = None
         # Image Sources
         self.image_source = Source(self.config)
@@ -37,7 +39,8 @@ class Processor:
                 if not self.dmd:
                     self.__init_dmd()
                 for image_path in source_1_paths: 
-                    self.__process_image(image_path, detection_method='datamatrix', dispose=False)
+                    if self.hash.check(image_path):
+                        self.__process_image(image_path, detection_method='datamatrix', dispose=False)
 
     def exec_from_input(self):
         """ Process images from 'input' source """
@@ -49,7 +52,8 @@ class Processor:
                 if not self.dmd:
                     self.__init_dmd()
                 for image_path in source_2_input:
-                    self.__process_image(image_path, detection_method='datamatrix', dispose=True)
+                    if self.hash.check(image_path):
+                        self.__process_image(image_path, detection_method='datamatrix', dispose=True)
 
     def exec_from_output(self):
         """ Process images from 'output' source """
@@ -59,7 +63,8 @@ class Processor:
             print(f'{len(source_3_output)} photos detected')
             if source_3_output: 
                 for image_path in source_3_output:
-                    self.__process_image(image_path, detection_method='path', dispose=True)
+                    if self.hash.check(image_path):
+                        self.__process_image(image_path, detection_method='path', dispose=True)
 
 
     def exec(self):
@@ -101,3 +106,6 @@ class Processor:
         self.folders.save_image_to_output(image)
         if dispose:
             self.folders.dispose_original(image)
+        self.hash.add_hash_to_collection(image_path)
+
+
