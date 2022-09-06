@@ -66,6 +66,7 @@ class DB:
                             self.no_uid_lines_indexes.append(index+1)
 
     def __make_backup(self):
+        #TODO: add timestamp to backup
         with open(self.csv_file_path) as original:
             lines = original.readlines()
             with open(self.csv_file_path + '.backup', "w") as backup:
@@ -122,6 +123,7 @@ class DB:
         return len(self.no_uid_lines_indexes)
 
     def fill_empty_uids(self):
+        #TODO log changes
         self.__make_backup()
         with open(self.csv_file_path) as f: 
             lines = f.readlines()

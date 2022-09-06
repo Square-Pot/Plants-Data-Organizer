@@ -10,6 +10,8 @@ from .dmtx_detector import DataMatrixDetector
 # logging.basicConfig(level=logging.DEBUG)
 
 
+#TODO: collect hash for processed photos
+
 class Processor:
 
     def __init__(self, config: ConfigParser) -> None:
