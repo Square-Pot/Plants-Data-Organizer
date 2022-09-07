@@ -6,7 +6,7 @@ class Hash:
     def __init__(self, config) -> None:
         self.existing_hashes = []
         self.config = config
-        self.hash_collection_file = None
+        self.hash_collection_file = self.config['PATHS']['hash_collection']
         self.__check_hash_collection_file()
         self.__read_existing_hashes()
 
@@ -51,7 +51,6 @@ class Hash:
         return sha256.hexdigest()
     
     def __read_existing_hashes(self):
-        self.hash_collection_file = self.config['PATHS']['hash_collection']
         with open(self.hash_collection_file, 'r') as f: 
             lines = f.readlines()
 

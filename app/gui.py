@@ -205,6 +205,8 @@ class Gui:
 
     def __show_plant_info(self, frame):
 
+        #TODO: refactor according to https://stackoverflow.com/questions/43731784/tkinter-canvas-scrollbar-with-grid
+
         data_frame = tk.LabelFrame(frame, text='Plant information', width=25)
 
         data = self.db.get_item(self.cur_uid)
