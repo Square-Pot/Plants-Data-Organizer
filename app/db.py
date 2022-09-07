@@ -1,7 +1,8 @@
 import re
 import os
-from random import randint
 import logging
+import datetime
+from random import randint
 
 from .classes import GenusColumnNotFoundError
 
@@ -66,10 +67,10 @@ class DB:
                             self.no_uid_lines_indexes.append(index+1)
 
     def __make_backup(self):
-        #TODO: add timestamp to backup
+        timestampt = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
         with open(self.csv_file_path) as original:
             lines = original.readlines()
-            with open(self.csv_file_path + '.backup', "w") as backup:
+            with open(f"{ self.csv_file_path }_[{ timestampt }].backup", "w") as backup:
                 backup.writelines(lines)
 
     def __get_new_uid(self, additionals_uids):
