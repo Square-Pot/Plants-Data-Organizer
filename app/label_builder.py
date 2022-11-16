@@ -5,6 +5,8 @@ from pylibdmtx.pylibdmtx import encode
 from PIL import Image, ImageEnhance
 from fpdf import FPDF
 
+from .folders import FolderStructure
+
 DATA_MATRIX_SIZE = 30   # px
 LABEL_LENGHT = 80       # mm
 NEXT_COLUMN_X = 90      # mm
@@ -109,7 +111,7 @@ class Label:
 
 
 class LabelsBuilder:
-    def __init__(self, rich_plants:list):
+    def __init__(self, folders:FolderStructure, rich_plants:list):
         self.rich_plants = rich_plants
         self.page_high = 297                                    # high of A4 
         self.v_space = VERTICAL_SPACE                           # vertical space between labels
@@ -122,6 +124,9 @@ class LabelsBuilder:
         self.cur_x = self.start_x
         self.cur_y = self.start_y
         self.cur_column = 1
+
+        folders.check_pdf_labels_folder()
+        self.output_folder = folders.get_pdf_label_folder()
 
     def _create_pdf(self) -> FPDF:
         """PDF-object create and setup"""
@@ -232,6 +237,6 @@ class LabelsBuilder:
         """Generating PDF-file"""
         dt_stamp = datetime.datetime.now().strftime('%d-%m-%Y_%H-%M-%S_%f')
         filename = f'Labels_{dt_stamp}.pdf'
-        fullpath = os.path.join('LABELS', filename)
+        fullpath = os.path.join(self.output_folder, filename)
         self.pdf.output(fullpath, 'F')
         return fullpath

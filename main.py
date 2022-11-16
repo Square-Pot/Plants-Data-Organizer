@@ -23,6 +23,8 @@ def main():
     processor = Processor(config)
     db = DB(config['DATABASE']['csv_file'])
 
+    #TODO: db-object create multiple times
+
     gui = Gui(config, db, folders, processor)
     gui.mainloop()
 
