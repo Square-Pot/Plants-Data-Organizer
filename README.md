@@ -20,6 +20,7 @@ Automatic **recognition** the plants on the photos by the label with a 2D-code (
     - [XLSX-file](#xlsx-file)
 - [Detection and recognition](#detection-and-recognition)
 - [Photo files organizing](#photo-files-organizing)
+- [Application interface example](#application-interface-example)
 - [Reusult examples](#result-examples)
 - [Creating labels](#creating-labels)
 - [FAQ](#creating-phisical-labels)
@@ -107,6 +108,13 @@ Photos from cases 2 and 3, if you can identify plant on it, can be manually plac
 The first step after app runnig is to create or update output folder structure. The output folder structure matches the database (reference file) structure exactly and represents inividual folder for each plant. The Name of individula plant folder containts UID and plant name (genus, species, etc.). If you manually delete some plant folder or delete the output folder structure completely, it will be recreated after next app lounch. 
 
 Each plant folder also has a subfolder with name `LABEL_REQURED` for labeling manual recognised plants photos. 
+
+
+## Application interface example 
+
+Here is how the app looks like: 
+ ![DataMatrix-Sorter_Interface](img/app_interface_example.png)
+
 
 ## Result examples
 
