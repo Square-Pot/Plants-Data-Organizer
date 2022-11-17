@@ -85,7 +85,7 @@ In current version you can provide photos of your plants in three ways:
 
 The main csv-file requirements  are: 
 - correct column names in first line;
-- filled UID column.
+- filled UID column (can be filled automatically).
 
 There are multiple inconveniences by editing csv-file, for example: during file opening type of UID column should be choosen as 'text', otherwise as 'number' by default the UID values with zero at the first place will loose it, wich means UID will be modified by opening, wich is unacceptable. Considering this csv format is using as temporary.
 
@@ -134,7 +134,7 @@ A PDF file with labels can be generated according to the reference file. The nex
 
 ![Lable](img/label.png)
 
-PDF-generator is not implemented in this repo yet, but it's ready and it will be here soon. 
+PDF-generator is implemented already. 
 
 
 ## FAQ
