@@ -180,6 +180,7 @@ class Gui:
         cur_row = 1
         cur_col = 0
         path = None
+        img_file_list = sorted(img_file_list)
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
             coeff = image.width / image.height
