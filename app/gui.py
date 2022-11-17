@@ -222,24 +222,42 @@ class Gui:
 
         #TODO: refactor according to https://stackoverflow.com/questions/43731784/tkinter-canvas-scrollbar-with-grid
 
-        data_frame = tk.LabelFrame(frame, text='Plant information', width=25)
+        data_frame = tk.LabelFrame(frame, text='Plant information')
+
+        canvas = tk.Canvas(data_frame, height=100)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
 
         data = self.db.get_item(self.cur_uid)
         title = self.__get_plant_title(data)
         keys = ':\r'.join(data.keys())
         values = '\r'.join(data.values())
 
-        label_title = tk.Label(data_frame, text=title, font=("Helvetica", 12, 'bold'))
-        label_keys = tk.Label(data_frame, text=keys, font=("Helvetica", 9, 'bold'), anchor="w", justify=tk.LEFT)
-        label_values = tk.Label(data_frame, text=values, font=("Helvetica", 9), anchor="w", justify=tk.LEFT)
+        label_title = tk.Label(scrollable_frame, text=title, font=("Helvetica", 12, 'bold'))
+        label_keys = tk.Label(scrollable_frame, text=keys, font=("Helvetica", 9, 'bold'), anchor="w", justify=tk.LEFT)
+        label_values = tk.Label(scrollable_frame, text=values, font=("Helvetica", 9), anchor="w", justify=tk.LEFT)
 
         #data_frame.grid_columnconfigure(0, weight=1)
-        data_frame.grid_columnconfigure(1, weight=1)
+        scrollable_frame.grid_columnconfigure(1, weight=1)
 
         label_title.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
         label_keys.grid(row=1, column=0, padx=5, sticky='w')
         label_values.grid(row=1, column=1, padx=5, sticky='w')
 
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y") 
         data_frame.pack(side = tk.LEFT, fill=tk.BOTH, expand=1)
 
     def __open_plant_folder(self):
