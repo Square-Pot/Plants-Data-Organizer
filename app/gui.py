@@ -116,13 +116,15 @@ class Gui:
     def __fill_frame_db(self, frame):
         input_frame = tk.LabelFrame(frame, text='Input reference file')
 
-        label_reference = tk.Label(input_frame, text='245 lines, UID for 12 is needed')
+        no_uid_number = self.db.get_number_with_no_uid()
+
+        label_reference = tk.Label(input_frame, text=f'245 lines, UID for { no_uid_number } is needed')
         label_reference.pack(padx=5, pady=10)
 
         button_generate_labels = tk.Button(input_frame, text="Generate Labels", command=self.handle_click_show_table)
         button_generate_labels.pack(fill=tk.BOTH,  padx=5)
 
-        self.btn_generate_uids_text.set(f"Generate UIDs [{ self.db.get_number_with_no_uid() }]")
+        self.btn_generate_uids_text.set(f"Generate UIDs [{ no_uid_number }]")
         button_generate_uids = tk.Button(input_frame, textvariable=self.btn_generate_uids_text, command=self.handle_click_generate_uids)
         button_generate_uids.pack(fill=tk.BOTH,  padx=5)
 
@@ -153,17 +155,33 @@ class Gui:
 
     def __show_images(self, frame, img_file_list):
         frame_width = frame.winfo_width()
+        frame_height = frame.winfo_height()
         thumb_min = int(self.config['GUI']['thumbnail_size'])
-
         max_photos_in_row = frame_width // thumb_min
+        rows_num = len(img_file_list) // max_photos_in_row + 1
 
+
+        canvas = tk.Canvas(frame)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
         num_photos_in_row = 0
         cur_row = 1
         cur_col = 0
         path = None
         for i, path in enumerate(img_file_list):
             image = Image.open(path)
-
             coeff = image.width / image.height
             if coeff > 1:
                 thumb_w = int(thumb_min * coeff)
@@ -171,37 +189,33 @@ class Gui:
             else: 
                 thumb_w = thumb_min
                 thumb_h = int(thumb_min / coeff)
-
             image = image.resize((thumb_w, thumb_h))
-
             crop_l = (image.width - thumb_min) / 2
             crop_r = crop_l + thumb_min
             crop_u = (image.height - thumb_min) / 2
             crop_b = crop_u + thumb_min
-
             image = image.crop((crop_l, crop_u, crop_r, crop_b))
-
             photo = ImageTk.PhotoImage(image)
-            label = tk.Label(frame, image = photo)
+            label = tk.Label(scrollable_frame, image = photo)
             label.image = photo
-
-            num_photos_in_row += 1
             cur_col += 1
-
-            if num_photos_in_row > max_photos_in_row:
+            if num_photos_in_row >= max_photos_in_row:
                 cur_row += 1
                 cur_col = 1
                 num_photos_in_row = 0
-
             label.grid(row=cur_row, column=cur_col)
-
+            num_photos_in_row += 1
             label.bind("<Button-1>",lambda e,path=path:self.__open_img_in_default_viewer(path))
             i += 1
 
         if path:
             self.cur_plant_path = os.path.dirname(os.path.abspath(path))
-            button_open_folder = tk.Button(frame, text="Open containing folder", command=self.__open_plant_folder)
+            button_open_folder = tk.Button(scrollable_frame, text="Open containing folder", command=self.__open_plant_folder)
             button_open_folder.grid(column=1, row=cur_row + 1, pady=10)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")  
+
 
     def __show_plant_info(self, frame):
 
