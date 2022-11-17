@@ -69,6 +69,8 @@ class Processor:
             for image_path in source_3_output:
                 if self.hash.check(image_path):
                     self.__process_image(image_path, detection_method='path', dispose=True)
+                else:
+                    print(f'Hash was found for photo [{ image_path }]. Procedure was cancelled.')
 
     # def exec(self):
     #     self.exec_from_paths()
