@@ -4,6 +4,7 @@ LABELS/
 backups/
 
 plants_export.txt
+hash_collection.txt
 *.pth
 
 /.vscode
