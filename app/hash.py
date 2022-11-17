@@ -70,7 +70,7 @@ class Hash:
         Returns True if hash was NOT found in hash collection
         """
         hash = self.get_hash(path_to_file)
-        return hash not in self.existing_hashes()
+        return hash not in self.existing_hashes
 
     def __check_hash_collection_file(self):
         """
