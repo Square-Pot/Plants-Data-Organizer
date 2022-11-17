@@ -117,7 +117,8 @@ class DB:
                 species_name_str = ' '.join(species_name_list)
                 species_list[self.data[i]['UID']] = species_name_str
                 
-        #species_list.sort()
+        # sorting by value
+        species_list = dict(sorted(species_list.items(), key=lambda item: item[1]))
         return species_list
 
     def get_number_with_no_uid(self):
