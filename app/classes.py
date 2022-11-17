@@ -3,6 +3,7 @@ import cv2
 import random
 import re
 import logging
+import json
 
 from .utils import get_valid_colors, image_resize
 from .utils import decode_data_matrix
@@ -207,3 +208,21 @@ class TargetImage:
             # put label text on image
             output_image = put_text_on_image(self.config, output_image, self.label_text, text_origin)
             self.output_image = output_image
+
+
+class Plant:
+    def __init__(self, data: dict):
+        self.__dict__.update(data)
+   
+def get_plant_as_obj(data: dict) -> Plant:
+    return json.loads(json.dumps(data), object_hook=Plant)
+
+
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+
+
+class GenusColumnNotFoundError(Error):
+    """Raised when genus column was not found"""
+    pass

@@ -19,6 +19,7 @@ class FolderStructure:
         self.input_folder = self.config['PATHS']['input_folder']
         self.current_structure = {}
         self.unsuccessful_folder = None
+        self.pdf_label_folder = self.config['PATHS']['pdf_labels_folder']
 
     def sync_with_db(self, db_object):
         """
@@ -32,7 +33,10 @@ class FolderStructure:
         else:
             self.__create_structure()
 
-    def get_current_structure(self):
+    def get_current_structure(self) -> dict:
+        """
+        Returns folder structure in OUTPUT folder as dict:  {uid:folder_name}
+        """
         self.__get_current_structure()
         return self.current_structure
 
@@ -57,7 +61,24 @@ class FolderStructure:
                     os.path.basename(image.path_to_original)
                 )
             )
-            
+
+    def get_img_paths(self, uid):
+        """ Return list of image file paths in plant folder by UID """
+        img_paths = []
+        plant_path = os.path.join(
+            self.output_dir,
+            self.get_current_structure()[uid]
+        )
+        for filename in os.listdir(plant_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                img_paths.append(
+                    os.path.join(
+                        #os.getcwd(),
+                        plant_path,
+                        filename
+                    )
+                )
+        return img_paths
 
     @staticmethod
     def __create_photo_filename(uid: str, dt, extension):
@@ -138,20 +159,24 @@ class FolderStructure:
             self.__create_item_folder(db_data[uid])
 
     def __get_current_structure(self):
-        # get current folder structure
+        """ Get current folder structure """
         pattern = r"^(\d+)_.+$"
-        output_dir_ls = os.listdir(self.output_dir)
-        for folder in output_dir_ls:
-            folder_path = os.path.join(self.output_dir, folder)
-            if os.path.exists(folder_path):
-                uid_search = re.search(pattern, folder)
-                if uid_search:
-                    uid = uid_search.group(1)
-                    self.current_structure[uid] = folder
+        if os.path.exists(self.output_dir):
+            output_dir_ls = os.listdir(self.output_dir)
+            for folder in output_dir_ls:
+                folder_path = os.path.join(self.output_dir, folder)
+                if os.path.exists(folder_path):
+                    uid_search = re.search(pattern, folder)
+                    if uid_search:
+                        uid = uid_search.group(1)
+                        self.current_structure[uid] = folder
+                    else:
+                        logger.warning('Foreign directory in output folder: %s', folder)
                 else:
-                    logger.warning('Foreign directory in output folder: %s', folder)
-            else:
-                logger.warning('Foreign object in output folder: %s', folder)
+                    logger.warning('Foreign object in output folder: %s', folder)
+        else:
+            logger.warning('No output folder structure was found')
+            return None
 
     def __update_structure(self):
         self.__get_current_structure()
@@ -172,6 +197,13 @@ class FolderStructure:
                 if re.match(r'\d+', uid):
                     self.__create_item_folder(db_data[uid])
                     logger.info('Folder for UID: %s was not found. Now created', uid)
+
+    def check_pdf_labels_folder(self):
+        if not os.path.exists(self.pdf_label_folder):
+            os.mkdir(self.pdf_label_folder)
+
+    def get_pdf_label_folder(self):
+        return self.pdf_label_folder
 
 
 def main():

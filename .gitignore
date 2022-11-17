@@ -1,5 +1,7 @@
 INPUT/
 OUTPUT/
+LABELS/
+backups/
 
 plants_export.txt
 *.pth

@@ -105,6 +105,32 @@ class Source:
             return False
 
 
+    def count_paths(self):
+        """ Returns number of photos in *paths* source """
+        photos: list = self.from_paths()
+        if photos:
+            return len(photos)
+        else:
+            return 0
+
+    def count_input(self):
+        """ Returns number of photos in *INPUT* source """
+        photos: list = self.from_input()
+        if photos:
+            return len(photos)
+        else:
+            return 0
+
+    def count_output(self, folder_structure_object):
+        """ Returns number of photos in *OUTPUT* source """
+        photos: list = self.from_output(folder_structure_object)
+        if photos:
+            return len(photos)
+        else:
+            return 0
+
+
+
 def test():
     s = Source('config')
     s.from_paths()
