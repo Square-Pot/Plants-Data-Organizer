@@ -33,6 +33,10 @@ class Gui:
         self.root.title("Data Matrix Sorter and Labeler")
         self.root.geometry("1000x600") 
 
+        # add icon
+        photo = tk.PhotoImage(file = 'icon.png')
+        self.root.wm_iconphoto(False, photo)
+
         self.checkbox_input_var = tk.IntVar()
         self.checkbox_paths_var = tk.IntVar()
         self.checkbox_output_var = tk.IntVar()
