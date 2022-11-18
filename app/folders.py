@@ -18,6 +18,7 @@ class FolderStructure:
         self.label_required_folder = self.config['PATHS']['label_required_folder_name']
         self.input_folder = self.config['PATHS']['input_folder']
         self.current_structure = {}
+        self.successful_folder = None
         self.unsuccessful_folder = None
         self.pdf_label_folder = self.config['PATHS']['pdf_labels_folder']
 
@@ -47,6 +48,15 @@ class FolderStructure:
             file_path, 
             # could not working on windows:
             os.path.join(self.unsuccessful_folder, os.path.basename(file_path))
+        )
+
+    def move_to_successful(self, file_path):
+        if not self.successful_folder:
+            self.__create_successful_dir()
+        os.replace(
+            file_path, 
+            # could not working on windows:
+            os.path.join(self.successful_folder, os.path.basename(file_path))
         )
 
     def dispose_original(self, image):

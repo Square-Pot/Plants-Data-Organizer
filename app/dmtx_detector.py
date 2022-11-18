@@ -75,8 +75,8 @@ class DataMatrixDetector:
         self.image = image
         self.outputs = self.predictor(image)
         bboxes = self.__get_bboxes()
-        logger.debug('%s data matrices was detected', len(bboxes))
         if bboxes:
+            logger.debug('%s data matrices was detected', len(bboxes))
             self.result = []
             for bbox in bboxes:
                 dm = DataMatrix()
@@ -86,6 +86,7 @@ class DataMatrixDetector:
                 self.result.append(dm)
             return True
         else:
+            logger.debug('No data matrices was detected')
             return False
 
 

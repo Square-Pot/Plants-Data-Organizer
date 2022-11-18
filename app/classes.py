@@ -71,7 +71,7 @@ class TargetImage:
         self.label_text: str = None
         self.output_image = None
 
-    def detect_dm(self, data_matrix_detector) -> None:
+    def detect_dm(self, data_matrix_detector) -> bool:
         """
         Detects data matrices on the photo.
         Save result as list of DataMatrix objects.
@@ -99,6 +99,7 @@ class TargetImage:
                 if dm.decoded_successful:
                     self.decoded_uids.append(dm.decoded_info)
                 else:
+                    print('Decoding failed')
                     bad_dmtxs.append(dm)
         # remove unsuccessful detected DataMatrix objects from list 
         for dm in bad_dmtxs:

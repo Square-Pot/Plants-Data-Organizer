@@ -58,6 +58,7 @@ class Processor:
                     self.__process_image(image_path, detection_method='datamatrix', dispose=True)
                 else:
                     print(f'Hash was found for photo [{ image_path }]. Procedure was cancelled.')
+                    self.folders.move_to_successful(image_path)
   
     def exec_from_output(self):
         """ Process images from 'output' source """
@@ -95,9 +96,10 @@ class Processor:
 
         if detection_method == 'datamatrix':
             dm_detected = image.detect_dm(self.dmd)
-            if not dm_detected and dispose:
-                self.folders.dispose_original(image)
-            image.decode_dm()
+            if dm_detected:
+                image.decode_dm()
+            else: 
+                print('No Data Matices was detected')
 
         if detection_method == 'path':
             image.decode_path()
@@ -114,11 +116,7 @@ class Processor:
                 self.folders.dispose_original(image)
             del image
         else: 
-            try:
-                # TDOD: for some reason cant find file, which exist
-                self.folders.move_to_unsuccessful(image.path_to_original)
-            except Exception as e:
-                print(e)
+            self.folders.move_to_unsuccessful(image.path_to_original)
         
 
 
