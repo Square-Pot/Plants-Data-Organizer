@@ -1,6 +1,7 @@
 from importlib.resources import path
 import os
 import sys
+import re
 import subprocess
 from configparser import ConfigParser
 import logging
@@ -137,7 +138,7 @@ class Gui:
     def __fill_frame_scroll_one(self, frame):
         genus_scrollbar = tk.Scrollbar(frame) 
         genus_listbox = tk.Listbox(frame, yscrollcommand = genus_scrollbar.set, width=25)  
-        genus_list = self.db.get_genus_list()
+        genus_list = self.db.get_genus_list(count_content=True)
         for genus in genus_list: 
             genus_listbox.insert(tk.END, genus) 
         genus_listbox.pack(side = tk.LEFT, fill = tk.Y )   
@@ -292,7 +293,14 @@ class Gui:
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
-            genus = event.widget.get(index)
+            genus_selection = event.widget.get(index)
+            genus_search = re.search(r'^(\w+) \[\d+\]$', genus_selection)
+            if genus_search:
+                genus = genus_search.group(1)
+            else:
+                print('Something wrong with genus name')
+                genus = genus_selection
+
             self.__clear_frame(self.frame_bottom_center)
             self.__fill_frame_scroll_two(self.frame_bottom_center, genus)
 

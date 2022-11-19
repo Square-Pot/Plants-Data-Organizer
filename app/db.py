@@ -91,13 +91,25 @@ class DB:
         else:
             return False
 
-    def get_genus_list(self):
+    def get_genus_list(self, count_content=False):
         genus_list = []
+        content_counter = {}
         for i in self.data: 
             genus = self.data[i]['genus']
             if genus not in genus_list:
                 genus_list.append(genus)
+            if genus not in content_counter:
+                content_counter[genus] = 1
+            else:
+                content_counter[genus] += 1
         genus_list.sort()
+        
+        if count_content:
+            genus_list_with_cnt = []
+            for genus in genus_list:
+                genus_list_with_cnt.append(f'{ genus } [{ content_counter[genus] }]')
+            return genus_list_with_cnt
+        
         return genus_list
 
     def get_species_list(self, genus):
