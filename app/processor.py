@@ -15,15 +15,16 @@ from .hash import Hash
 
 class Processor:
 
-    def __init__(self, config: ConfigParser) -> None:
+    def __init__(self, config: ConfigParser, db: DB, folders: FolderStructure ) -> None:
         self.config = config
-        self.db = DB(self.config['DATABASE']['csv_file'])
-        self.folders = FolderStructure(self.config)
+        self.db = db
+        self.folders = folders
         self.folders.sync_with_db(self.db)
         self.hash = Hash(self.config)
         self.dmd = None
         # Image Sources
         self.image_source = Source(self.config)
+        self.__init_dmd()
 
     def __init_dmd(self):
         self.dmd = DataMatrixDetector(self.config['DETECTION']['model_file'])
@@ -36,8 +37,8 @@ class Processor:
         source_1_paths = self.image_source.from_paths()
         print(f'{len(source_1_paths)} photos detected')
         if source_1_paths: 
-            if not self.dmd:
-                self.__init_dmd()
+            # if not self.dmd:
+            #     self.__init_dmd()
             for image_path in source_1_paths: 
                 if self.hash.check(image_path):
                     self.__process_image(image_path, detection_method='datamatrix', dispose=False)
@@ -51,8 +52,8 @@ class Processor:
         source_2_input = self.image_source.from_input()
         print(f'{len(source_2_input)} photos detected')
         if source_2_input: 
-            if not self.dmd:
-                self.__init_dmd()
+            # if not self.dmd:
+            #     self.__init_dmd()
             for image_path in source_2_input:
                 if self.hash.check(image_path):
                     self.__process_image(image_path, detection_method='datamatrix', dispose=True)
@@ -101,7 +102,7 @@ class Processor:
             else: 
                 print('No Data Matices was detected')
 
-        if detection_method == 'path':
+        elif detection_method == 'path':
             image.decode_path()
         
         if image.decoded_uids: 

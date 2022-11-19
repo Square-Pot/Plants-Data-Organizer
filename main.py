@@ -20,8 +20,9 @@ def main():
     config = ConfigParser()
     config.read('settings.ini')
     folders = FolderStructure(config)
-    processor = Processor(config)
     db = DB(config['DATABASE']['csv_file'])
+    processor = Processor(config, db, folders)
+    
 
     #TODO: db-object create multiple times
 
