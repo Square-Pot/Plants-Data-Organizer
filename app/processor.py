@@ -54,7 +54,7 @@ class Processor:
                 for image_path in source_2_input:
                     if self.hash.check(image_path):
                         self.__process_image(image_path, detection_method='datamatrix', dispose=True)
-
+  
     def exec_from_output(self):
         """ Process images from 'output' source """
         if int(self.config['SOURCES']['output_folder']):
@@ -98,14 +98,23 @@ class Processor:
         if detection_method == 'path':
             image.decode_path()
         
-        image.add_shooting_date()
-        image.extract_db_data(self.db)
-        image.generate_labels()
-        image.place_labels_on_image()
-        # # image.add_logo()
-        self.folders.save_image_to_output(image)
-        if dispose:
-            self.folders.dispose_original(image)
-        self.hash.add_hash_to_collection(image_path)
+        if image.decoded_uids: 
+            image.add_shooting_date()
+            image.extract_db_data(self.db)
+            image.generate_labels()
+            image.place_labels_on_image()
+            # # image.add_logo()
+            self.folders.save_image_to_output(image)
+            self.hash.add_hash_to_collection(image_path)
+            if dispose:
+                self.folders.dispose_original(image)
+            del image
+        else: 
+            try:
+                # TDOD: for some reason cant find file, which exist
+                self.folders.move_to_unsuccessful(image.path_to_original)
+            except Exception as e:
+                print(e)
+        
 
 
