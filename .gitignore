@@ -6,6 +6,7 @@ backups/
 plants_export.txt
 hash_collection.txt
 *.pth
+hash_collection.txt
 
 /.vscode
 
